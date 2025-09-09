@@ -354,9 +354,9 @@
                             <h3 class="text-sm font-medium text-gray-500">Dossiers Totaux</h3>
                             <p id="statTotal" class="text-3xl font-bold text-gray-900 mt-2">0</p>
                         </div>
-                        <div id="statCardInitialOverdue" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-red-500 transition" style="animation-delay: 0.5s;">
-                            <h3 class="text-sm font-medium text-gray-500">En Retard (30min)</h3>
-                            <p id="statInitialOverdue" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                        <div id="statCard48hOverdue" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-red-200 hover:border-red-500 transition" style="animation-delay: 0.5s;">
+                            <h3 class="text-sm font-medium text-gray-500">En Retard (48h)</h3>
+                            <p id="stat48hOverdue" class="text-3xl font-bold text-red-600 mt-2">0</p>
                         </div>
                         <div id="statCardCompleted" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.2s;">
                             <h3 class="text-sm font-medium text-gray-500">Dossiers Terminés</h3>
@@ -552,7 +552,7 @@
                                         <option value="inachevee">En cours</option>
                                         <option value="À faire">À faire</option>
                                         <option value="Annulé">Annulé</option>
-                                        <option value="initialOverdue" class="text-red-600 font-medium">En Retard (30min)</option>
+                                        <option value="48hOverdue" class="text-red-600 font-medium">En Retard (48h)</option>
                                     </select>
                                 </div>
                             </div>
@@ -580,8 +580,8 @@
                 Ajouter une Tâche
             </button>
         </div>
-        <div class="mt-6 p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center gap-3">
-            <div class="relative w-full sm:w-auto flex-grow">
+            <div id="advancedTaskFilterBar" class="mt-6 p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative w-full sm:w-auto flex-grow">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
                 </div>
@@ -838,6 +838,7 @@
                     <div id="agentAssignmentSection" class="hidden mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <label for="modalAgentAssign" class="block text-sm font-bold text-blue-800 mb-2">Assigner à un Agent</label>
                         <select id="modalAgentAssign" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></select>
+                        <div id="agentAvailabilityWarning" class="hidden mt-2 p-2 text-sm text-red-800 bg-red-100 rounded-lg"></div>
                     </div>
 
                     <div class="mb-6">
@@ -1128,7 +1129,7 @@
     
     <script type="module">
 // --- CONFIGURATION ---
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHXLAUvifOx1gCsD0VSmTajEFywPuX5MHVpBokuMUBscQ5p9-9QQ7OUUBXMY-jg_mQ/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQ_ADxmdHNBGdka657C296B5it69Dmg-ycE7lw2OCvClDcT5yUnmTcHBugtrYT7S51/exec';
 const MISSION_DURATION_MIN = 30; // Temps estimé par mission en minutes
 const WORK_DAY_HOURS = 8; // Heures de travail par jour
 
@@ -1146,6 +1147,7 @@ let calendarDate = new Date();
 let productivityCharts = {};
 let calendarEvents = [];
 let statsChart = null;
+let unavailableAgentsToday = []; // Add this line
 
 
 // --- DOM ELEMENTS ---
@@ -1242,6 +1244,7 @@ const advancedTaskPriorityFilter = document.getElementById('advancedTaskPriority
 const todoCount = document.getElementById('todo-count');
 const inprogressCount = document.getElementById('inprogress-count');
 const doneCount = document.getElementById('done-count');
+const advancedTaskFilterBar = document.getElementById('advancedTaskFilterBar');
 
 const statCardHighDevis = document.getElementById('statCardHighDevis');
 const statHighDevis = document.getElementById('statHighDevis');
@@ -1319,15 +1322,27 @@ async function keepAlive() {
 }
 setInterval(keepAlive, 300000);
 
+async function fetchUnavailableAgents() {
+    try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=getUnavailableAgentsToday`);
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        unavailableAgentsToday = data;
+    } catch (error) {
+        console.error("Error fetching unavailable agents:", error);
+        // This is a non-critical error, so we don't show a big error message
+    }
+}
+
 // --- NEW: Global Timer Function ---
 function updateAllTimers() {
     const timerElements = document.querySelectorAll('.countdown-timer');
     timerElements.forEach(timerEl => {
-        const receptionDate = new Date(timerEl.dataset.receptionDate);
-        if (isNaN(receptionDate)) return;
+        const startTime = new Date(timerEl.dataset.startTime);
+        if (isNaN(startTime)) return;
 
         const thirtyMinutesInMillis = 30 * 60 * 1000;
-        const endTime = receptionDate.getTime() + thirtyMinutesInMillis;
+        const endTime = startTime.getTime() + thirtyMinutesInMillis;
         const now = new Date().getTime();
         const timeLeft = endTime - now;
 
@@ -1338,7 +1353,6 @@ function updateAllTimers() {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
                 <span>${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</span>
             `;
-            timerEl.classList.remove('text-red-600', 'bg-red-100');
             timerEl.classList.add('text-orange-600', 'bg-orange-100');
         } else {
             timerEl.innerHTML = `
@@ -1359,13 +1373,26 @@ function showPage(pageId) {
 
     document.getElementById(pageId).classList.remove('hidden');
 
-    if (pageId === 'advancedTasksPage') fetchAdvancedTasks();
+    if (pageId === 'advancedTasksPage') {
+        const isPrivilegedUser = currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner';
+        // Toggle visibility of the entire filter bar based on user role
+        advancedTaskFilterBar.classList.toggle('hidden', !isPrivilegedUser);
+        fetchAdvancedTasks();
+    }    
     if (pageId === 'dossiersPage') filterAndRender();
     if (pageId === 'productivityPage') renderProductivityPage();
     if (pageId === 'calendarPage') {
-            populateCalendarAgentFilter();
-            renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+        const isPrivilegedUser = currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner';
+        
+        if (isPrivilegedUser) {
+            calendarAgentFilter.classList.remove('hidden');
+            populateCalendarAgentFilter(); // Only populate for admins
+        } else {
+            calendarAgentFilter.classList.add('hidden');
         }
+        
+        renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+    }
     if (pageId === 'statsPage') renderStatsPage('weekly');
     if (pageId === 'statsPage') renderStatsPage('weekly');
     if (pageId === 'facturationPage') renderFacturationPage(); // Add this line
@@ -1465,7 +1492,8 @@ function filterDataForView() {
 async function saveChanges() {
     let taskDataPayload;
 
-    if (currentTaskId === null) {
+    // --- Step 1: Build the basic payload for either a new or existing dossier ---
+    if (currentTaskId === null) { // This is a NEW dossier
         const ref = document.getElementById('modalRefInput').value.trim();
         const assure = document.getElementById('modalAssureInput').value.trim();
         if (!ref || !assure) {
@@ -1476,7 +1504,6 @@ async function saveChanges() {
             showError(`Un dossier avec la référence "${ref}" existe déjà.`);
             return;
         }
-
         taskDataPayload = {
             action: 'addOrUpdate',
             id: ref,
@@ -1490,81 +1517,60 @@ async function saveChanges() {
             natureDossier: document.getElementById('modalNatureDossierInput').value,
             dateReception: new Date().toISOString(),
         };
-
-    } else {
+    } else { // This is an EXISTING dossier
         const taskIndex = allTasksData.findIndex(t => String(t.id).trim() == String(currentTaskId).trim());
         if (taskIndex === -1) return;
-        taskDataPayload = { ...allTasksData[taskIndex]
-        };
+        taskDataPayload = { ...allTasksData[taskIndex] };
         taskDataPayload.action = 'addOrUpdate';
 
+        // Only admins/assigners can change the agent on an existing task
         if (currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner') {
             taskDataPayload.agent = modalAgentAssign.value;
         }
     }
 
-    loadingSpinner.classList.remove('hidden');
-
+    // --- Step 2: Add all other data fields to the payload ---
     taskDataPayload.userEmail = currentUser.email;
     taskDataPayload.userName = currentUser.name;
-
-    const montantDevisInput = document.getElementById('modalMontantDevis');
-    const devisRectifieInput = document.getElementById('modalDevisRectifie');
-    const montantFactureInput = document.getElementById('modalMontantFacture');
-    const forfaitInput = document.getElementById('modalMontantForfait');
-    const devisStatusSelect = document.getElementById('devisStatusSelect');
-
-    taskDataPayload.montantDevis = montantDevisInput ? parseFloat(montantDevisInput.value) || 0 : 0;
-    taskDataPayload.devisRectifie = devisRectifieInput ? parseFloat(devisRectifieInput.value) || 0 : 0;
-    taskDataPayload.montantFacture = montantFactureInput ? parseFloat(montantFactureInput.value) || 0 : 0;
-    taskDataPayload.fraisExpertise = parseFloat(document.getElementById('modalFraisExpertise').value) || 0; // Add this line
+    taskDataPayload.montantDevis = parseFloat(document.getElementById('modalMontantDevis').value) || 0;
+    taskDataPayload.devisRectifie = parseFloat(document.getElementById('modalDevisRectifie').value) || 0;
+    taskDataPayload.montantFacture = parseFloat(document.getElementById('modalMontantFacture').value) || 0;
+    taskDataPayload.fraisExpertise = parseFloat(document.getElementById('modalFraisExpertise').value) || 0;
     taskDataPayload.telephoneAssure = document.getElementById('modalTelephoneAssureInput').value;
     taskDataPayload.nomAgentAssurance = document.getElementById('modalNomAgentAssuranceInput').value;
     taskDataPayload.telephoneAgentAssurance = document.getElementById('modalTelephoneAgentAssuranceInput').value;
-
-    taskDataPayload.montantForfait = forfaitInput ? parseFloat(forfaitInput.value) || 0 : 0;
-
     taskDataPayload.photoDate = document.getElementById('modalPhotoDate').value || null;
     taskDataPayload.factureStatut = document.getElementById('modalFactureStatut').value || '';
     taskDataPayload.factureDate = document.getElementById('modalFactureDate').value || null;
     taskDataPayload.notes = document.getElementById('modalNotes').value;
-
-    const originalTask = allTasksData.find(t => String(t.id).trim() == String(currentTaskId).trim());
-    const originalChecklist = originalTask ? (originalTask.checklist || {}) : {};
-    // Add this block to handle the report sent checkbox
+    taskDataPayload.devisStatus = document.getElementById('devisStatusSelect') ? document.getElementById('devisStatusSelect').value : '';
+    taskDataPayload.montantForfait = document.getElementById('modalMontantForfait') ? parseFloat(document.getElementById('modalMontantForfait').value) || 0 : 0;
+    
     const reportSentCheckbox = document.getElementById('modalReportSent');
-    if (reportSentCheckbox && !reportSentSection.classList.contains('hidden')) {
+    if (reportSentCheckbox && !reportSentCheckbox.closest('#reportSentSection').classList.contains('hidden')) {
+        const originalTask = allTasksData.find(t => String(t.id).trim() == String(currentTaskId).trim());
         if (reportSentCheckbox.checked) {
-            // If it's checked now but didn't have a date before, set a new date. Otherwise, keep the old date.
             taskDataPayload.rapportEnvoye = (originalTask ? originalTask.rapportEnvoye : null) || new Date().toISOString();
         } else {
-            taskDataPayload.rapportEnvoye = null; // Clear the date if unchecked
+            taskDataPayload.rapportEnvoye = null;
         }
     }
+
     const checklistInputs = document.querySelectorAll('#detailsContent input[data-item]');
     const newChecklist = {};
+    const originalTaskForChecklist = allTasksData.find(t => String(t.id).trim() == String(currentTaskId).trim());
+    const originalChecklist = originalTaskForChecklist ? (originalTaskForChecklist.checklist || {}) : {};
     checklistInputs.forEach(input => {
         const key = input.dataset.item;
-        const originalTimestamp = originalChecklist[key];
-
         if (input.checked) {
-            newChecklist[key] = originalTimestamp || new Date().toISOString();
+            newChecklist[key] = originalChecklist[key] || new Date().toISOString();
         } else {
             newChecklist[key] = null;
         }
     });
     taskDataPayload.checklist = newChecklist;
 
-    if (devisStatusSelect) {
-        taskDataPayload.devisStatus = devisStatusSelect.value;
-    } else {
-        taskDataPayload.devisStatus = '';
-    }
-
-    const {
-        completed,
-        total
-    } = getChecklistProgress(taskDataPayload.checklist);
+    const { completed, total } = getChecklistProgress(taskDataPayload.checklist);
     if (taskDataPayload.devisStatus === 'Forfait' && taskDataPayload.montantForfait > 0) {
         taskDataPayload.statut = '✅ Terminé';
     } else if (completed === total) {
@@ -1575,13 +1581,20 @@ async function saveChanges() {
         taskDataPayload.statut = '📆 À faire';
     }
 
+    // --- Step 3: Perform the final availability check right before sending ---
+    const finalAgentName = taskDataPayload.agent;
+    if (finalAgentName && unavailableAgentsToday.includes(finalAgentName)) {
+        showError(`Impossible d'enregistrer. ${finalAgentName} est en congé aujourd'hui.`);
+        return; // This is the hard block that stops the save.
+    }
+    // --- End of check ---
+
+    loadingSpinner.classList.remove('hidden');
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(taskDataPayload)
         });
         const result = await response.json();
@@ -1591,6 +1604,9 @@ async function saveChanges() {
         await fetchTasks();
         await fetchAdvancedTasks();
         await fetchNotifications();
+        if (!calendarPage.classList.contains('hidden')) {
+            renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+        }
     } catch (error) {
         console.error("Error saving changes: ", error);
         showError(`Erreur lors de la sauvegarde: ${error.message}`);
@@ -1643,11 +1659,22 @@ async function initializeAppState() {
         headerProfilePic.src = 'https://placehold.co/40x40';
     }
 
-    if (currentUser.role.toLowerCase() === 'admin') {
-        document.getElementById('navAdmin').classList.remove('hidden');
-    } else {
-        document.getElementById('navAdmin').classList.add('hidden');
-    }
+    const productivityLink = document.getElementById('navProductivity');
+    const statsLink = document.getElementById('navStats');
+    const facturationLink = document.getElementById('navFacturation');
+    const adminLink = document.getElementById('navAdmin');
+
+    if (currentUser.role.toLowerCase() === 'admin') {
+        productivityLink.classList.remove('hidden');
+        statsLink.classList.remove('hidden');
+        facturationLink.classList.remove('hidden');
+        adminLink.classList.remove('hidden');
+    } else {
+        productivityLink.classList.add('hidden');
+        statsLink.classList.add('hidden');
+        facturationLink.classList.add('hidden');
+        adminLink.classList.add('hidden');
+    }
 
     if (currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner') {
         addTaskBtn.classList.remove('hidden');
@@ -1672,7 +1699,7 @@ async function initializeAppState() {
     }
 
     try {
-        await Promise.all([fetchAgents(), fetchTasks(), fetchAdvancedTasks(), fetchNotifications(), fetchCalendarEvents()]);
+    await Promise.all([fetchAgents(), fetchTasks(), fetchAdvancedTasks(), fetchNotifications(), fetchCalendarEvents(), fetchUnavailableAgents()]);
     } catch (error) {
         console.error("Initial data fetch failed:", error);
         showError("Le chargement des données a échoué. Veuillez réessayer.");
@@ -1729,9 +1756,16 @@ function updateDashboard() {
 
     const statTodoEl = document.getElementById('statTodo');
     if (statTodoEl) statTodoEl.textContent = todoTasks.length;
-    const initialOverdueTasks = tasksData.filter(t => t.isInitialTaskOverdue);
-    const statInitialOverdueEl = document.getElementById('statInitialOverdue');
-    if (statInitialOverdueEl) statInitialOverdueEl.textContent = initialOverdueTasks.length;
+    const overdue48hTasks = tasksData.filter(t => t.is48hOverdue);
+    const stat48hOverdueEl = document.getElementById('stat48hOverdue');
+    if (stat48hOverdueEl) stat48hOverdueEl.textContent = overdue48hTasks.length;
+
+    // Also, make the new card clickable
+    document.getElementById('statCard48hOverdue').addEventListener('click', () => {
+        showPage('dossiersPage');
+        statusFilter.value = '48hOverdue';
+        filterAndRender();
+    });
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -2220,7 +2254,7 @@ function renderTasks(tasks) {
 
         const urgentIcon = task.urgent ? `<span class="text-red-500" title="Dossier Urgent"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 3.001-1.742 3.001H4.42c-1.53 0-2.493-1.667-1.743-3.001l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></span>` : '';
         const cardBorderClass = task.urgent ? 'border-red-500 border-2' : 'border-gray-200';
-        const initialOverdueBadge = task.isInitialTaskOverdue ? `<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full ml-2">EN RETARD</span>` : '';
+        const overdue48hBadge = task.is48hOverdue ? `<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full ml-2">EN RETARD (48h)</span>` : '';
         const card = document.createElement('div');
         card.className = `task-card bg-white p-5 rounded-xl shadow-sm ${cardBorderClass} hover:shadow-lg hover:border-blue-500 transition-all duration-300 cursor-pointer flex flex-col justify-between`;
         card.dataset.taskId = task.id;
@@ -2228,12 +2262,35 @@ function renderTasks(tasks) {
             <div>
                 <div class="flex justify-between items-start">
                     <div class="flex items-center gap-1">
-                        <p class="text-sm font-bold text-blue-600">${task.ref}</p>${initialOverdueBadge}
+                        <p class="text-sm font-bold text-blue-600">${task.ref}</p>${overdue48hBadge}
                         ${urgentIcon}
                     </div>
                     <span class="status-badge ${statusClass}">${statusText || 'N/A'}</span>
                 </div>
                 <h3 class="font-bold text-lg mt-2 truncate">${task.assure}</h3>
+
+                <!-- NEW: Phone Number and Contact Actions -->
+                ${task.telephoneAssure ? `
+                <div class="mt-2 flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm">
+                    <span class="font-medium text-gray-800">${task.telephoneAssure}</span>
+                    <div class="flex items-center space-x-1">
+                        <a href="tel:${task.telephoneAssure}" title="Appeler" class="p-2 rounded-full bg-white hover:bg-green-100 text-green-600 transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                        </a>
+                        <a href="https://wa.me/${task.telephoneAssure}" target="_blank" title="Message WhatsApp" class="p-2 rounded-full bg-white hover:bg-blue-100 text-blue-600 transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM6.5 10a.5.5 0 01.5-.5h6a.5.5 0 010 1H7a.5.5 0 01-.5-.5zm2-3a.5.5 0 01.5-.5h2a.5.5 0 010 1H9a.5.5 0 01-.5-.5z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                ` : `
+                <div class="mt-2 text-sm text-gray-400 italic">Pas de numéro de Tél.</div>
+                `}
+                <!-- END of new section -->
+
                 <div class="mt-2 space-y-1.5 text-sm text-gray-600">
                     <p class="flex items-center gap-2 truncate">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H5a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" /></svg>
@@ -2247,9 +2304,6 @@ function renderTasks(tasks) {
                 <p class="text-sm text-gray-500 truncate mt-2">${task.marqueModele || ''}</p>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-                ${task.isTimerActive ? `
-                <div class="countdown-timer flex items-center justify-center gap-1.5 text-sm font-bold p-1.5 rounded-md mb-3" data-reception-date="${task.dateReception}">
-                </div>` : ''}
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-xs font-semibold text-gray-600">Progression</span>
                     <span class="text-xs font-bold text-gray-700">${completed}/${total}</span>
@@ -2423,8 +2477,8 @@ function filterAndRender(options = {}) {
                 const s = normalizeString(getCleanedStatus(task.statut));
                 return s.includes('inachevee') || s.includes('en cours');
             });
-        } else if (status === 'initialOverdue') { // THIS IS THE NEW PART
-            filteredTasks = filteredTasks.filter(task => task.isInitialTaskOverdue);
+        } else if (status === '48hOverdue') {
+            filteredTasks = filteredTasks.filter(task => task.is48hOverdue);
         } else {
             const s = normalizeString(status);
             filteredTasks = filteredTasks.filter(task => task.statut && normalizeString(getCleanedStatus(task.statut)).includes(s));
@@ -2503,6 +2557,22 @@ function navigateToTasksWithHighDevis() {
     });
 }
 
+function checkAgentAvailability(agentName) {
+    const warningDiv = document.getElementById('agentAvailabilityWarning');
+    const saveBtn = document.getElementById('saveChanges');
+
+    if (agentName && unavailableAgentsToday.includes(agentName)) {
+        warningDiv.textContent = `Attention : ${agentName} est en congé aujourd'hui. L'assignation est bloquée.`;
+        warningDiv.classList.remove('hidden');
+        saveBtn.classList.add('bg-gray-400', 'hover:bg-gray-400', 'cursor-not-allowed');
+        saveBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    } else {
+        warningDiv.classList.add('hidden');
+        saveBtn.classList.remove('bg-gray-400', 'hover:bg-gray-400', 'cursor-not-allowed');
+        saveBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    }
+}
+
 function openModalForNewTask() {
     currentTaskId = null;
     document.getElementById('modalTitle').textContent = 'Créer un Nouveau Dossier';
@@ -2526,6 +2596,8 @@ function openModalForNewTask() {
     agents.filter(a => a.role === 'employee').forEach(emp => {
         modalAgentAssign.appendChild(new Option(emp.name, emp.name));
     });
+
+    checkAgentAvailability(''); // Reset warning when opening modal
 
     const step1Items = ["Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", "Photos roues et au dessous", "Compteur Km", "VIN", "Devis"];
     const step2Items = ["Photos en cours et après réparation"];
@@ -2632,7 +2704,6 @@ async function openModal(taskId) {
     tabActivity.classList.remove('hidden');
     tabFiles.classList.remove('hidden');
     document.getElementById('modalStepper').classList.remove('hidden');
-
     modalDisplayGrid.classList.remove('hidden');
     modalInputGrid.classList.add('hidden');
 
@@ -2645,38 +2716,25 @@ async function openModal(taskId) {
     document.getElementById('modalDateSinistre').textContent = task.dateSinistre ? new Date(task.dateSinistre).toLocaleDateString('fr-FR') : 'N/A';
     document.getElementById('modalMarqueModele').textContent = task.marqueModele || '';
     document.getElementById('modalNatureDossier').textContent = task.natureDossier || '';
-
-
-    const montantDevisInput = document.getElementById('modalMontantDevis');
-    if (montantDevisInput) montantDevisInput.value = task.montantDevis || '';
-
-    const devisRectifieInput = document.getElementById('modalDevisRectifie');
-    if (devisRectifieInput) devisRectifieInput.value = task.devisRectifie || '';
-
-    const montantFactureInput = document.getElementById('modalMontantFacture');
+    
+    document.getElementById('modalMontantDevis').value = task.montantDevis || '';
+    document.getElementById('modalDevisRectifie').value = task.devisRectifie || '';
+    document.getElementById('modalMontantFacture').value = task.montantFacture || '';
     document.getElementById('modalTelephoneAssure').textContent = task.telephoneAssure || 'N/A';
     document.getElementById('modalNomAgentAssurance').textContent = task.nomAgentAssurance || 'N/A';
     document.getElementById('modalTelephoneAgentAssurance').textContent = task.telephoneAgentAssurance || 'N/A';
     
-    // ----- FIX STARTS HERE -----
-    // Populate the hidden input fields as well to prevent data erasure on save
     document.getElementById('modalTelephoneAssureInput').value = task.telephoneAssure || '';
     document.getElementById('modalNomAgentAssuranceInput').value = task.nomAgentAssurance || '';
     document.getElementById('modalTelephoneAgentAssuranceInput').value = task.telephoneAgentAssurance || '';
-    // ----- FIX ENDS HERE -----
+    
+    document.getElementById('modalFraisExpertise').value = task.fraisExpertise || '';
 
-
-    if (montantFactureInput) montantFactureInput.value = task.montantFacture || '';
-    document.getElementById('modalFraisExpertise').value = task.fraisExpertise || ''; // Add this line
-
-    // -- NEW: Render communication actions and logs --
     const clientContactActions = document.getElementById('clientContactActions');
     const agentContactActions = document.getElementById('agentContactActions');
     clientContactActions.innerHTML = '';
     agentContactActions.innerHTML = '';
-
     const whatsappMessage = `Bonjour, concernant votre dossier d'accident N° ${task.ref}, assuré(e) ${task.assure}.`;
-
     if (task.telephoneAssure) {
         clientContactActions.innerHTML = `
             <button class="contact-btn bg-blue-500 text-white py-1 px-3 rounded-lg text-sm" data-type="call" data-target="client">Log Appel</button>
@@ -2690,25 +2748,22 @@ async function openModal(taskId) {
         `;
     }
 
+    // --- THIS IS THE FIX ---
+    // We add `|| []` to provide a safe fallback in case the property is undefined.
     document.getElementById('clientCommLog').innerHTML = `
-        <p><strong>Appels:</strong> ${task.appelsAssure.join(' | ') || 'Aucun'}</p>
-        <p><strong>WhatsApp:</strong> ${task.whatsAppAssure.join(' | ') || 'Aucun'}</p>
+        <p><strong>Appels:</strong> ${(task.appelsAssure || []).join(' | ') || 'Aucun'}</p>
+        <p><strong>WhatsApp:</strong> ${(task.whatsAppAssure || []).join(' | ') || 'Aucun'}</p>
     `;
     document.getElementById('agentCommLog').innerHTML = `
-        <p><strong>Appels:</strong> ${task.appelsAgentAssurance.join(' | ') || 'Aucun'}</p>
-        <p><strong>WhatsApp:</strong> ${task.whatsAppAgentAssurance.join(' | ') || 'Aucun'}</p>
+        <p><strong>Appels:</strong> ${(task.appelsAgentAssurance || []).join(' | ') || 'Aucun'}</p>
+        <p><strong>WhatsApp:</strong> ${(task.whatsAppAgentAssurance || []).join(' | ') || 'Aucun'}</p>
     `;
-
-
-
-    const forfaitInput = document.getElementById('modalMontantForfait');
-    if (forfaitInput) forfaitInput.value = task.montantForfait || '';
+    // --- END OF FIX ---
 
     document.getElementById('modalNotes').value = task.notes || '';
     document.getElementById('modalPhotoDate').value = task.photoDate || '';
     document.getElementById('modalFactureStatut').value = task.factureStatut || '';
     document.getElementById('modalFactureDate').value = task.factureDate || '';
-
 
     if (currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner') {
         modalAgentAssign.innerHTML = '';
@@ -2718,6 +2773,7 @@ async function openModal(taskId) {
         });
         modalAgentAssign.value = task.agent || '';
         agentAssignmentSection.classList.remove('hidden');
+        checkAgentAvailability(task.agent || '');
     } else {
         agentAssignmentSection.classList.add('hidden');
     }
@@ -2734,39 +2790,38 @@ async function openModal(taskId) {
         const isChecked = !!timestamp;
         const formattedDate = isChecked ? `(le ${formatDateTime(timestamp)})` : '';
         const uniqueId = `check-${key.replace(/\s+/g, '-')}`;
-
         if (key === "Devis") {
             item.className = 'flex flex-col items-start w-full';
             const devisStatus = task.devisStatus || '';
             item.innerHTML = `
-                        <div class="flex items-center justify-between w-full">
-                            <div class="flex items-center">
-                                <input id="${uniqueId}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <label for="${uniqueId}" class="ml-3 block text-sm text-gray-900">${key}</label>
-                            </div>
-                            <span class="text-xs text-gray-500">${formattedDate}</span>
-                        </div>
-                        <div id="devis-reason-container" class="mt-2 pl-7 w-full ${isChecked ? 'hidden' : ''}">
-                            <select id="devisStatusSelect" class="w-full p-1 border border-gray-300 rounded-md text-xs">
-                                <option value="" ${devisStatus === '' ? 'selected' : ''}>Raison (si non reçu)...</option>
-                                <option value="Agent n'a pas encore traité" ${devisStatus === "Agent n'a pas encore traité" ? 'selected' : ''}>Agent n'a pas encore traité</option>
-                                <option value="Client n'a pas envoyé" ${devisStatus === "Client n'a pas envoyé" ? 'selected' : ''}>Client n'a pas envoyé</option>
-                                <option value="Forfait" ${devisStatus === 'Forfait' ? 'selected' : ''}>Forfait</option>
-                            </select>
-                        </div>
-                        <div id="forfait-amount-container" class="mt-2 pl-7 w-full ${devisStatus !== 'Forfait' ? 'hidden' : ''}">
-                           <input type="number" id="modalMontantForfait" class="w-full p-1 border border-gray-300 rounded-md text-xs" placeholder="Montant Forfait (DH)" value="${task.montantForfait || ''}">
-                        </div>
-                    `;
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center">
+                        <input id="${uniqueId}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="${uniqueId}" class="ml-3 block text-sm text-gray-900">${key}</label>
+                    </div>
+                    <span class="text-xs text-gray-500">${formattedDate}</span>
+                </div>
+                <div id="devis-reason-container" class="mt-2 pl-7 w-full ${isChecked ? 'hidden' : ''}">
+                    <select id="devisStatusSelect" class="w-full p-1 border border-gray-300 rounded-md text-xs">
+                        <option value="" ${devisStatus === '' ? 'selected' : ''}>Raison (si non reçu)...</option>
+                        <option value="Agent n'a pas encore traité" ${devisStatus === "Agent n'a pas encore traité" ? 'selected' : ''}>Agent n'a pas encore traité</option>
+                        <option value="Client n'a pas envoyé" ${devisStatus === "Client n'a pas envoyé" ? 'selected' : ''}>Client n'a pas envoyé</option>
+                        <option value="Forfait" ${devisStatus === 'Forfait' ? 'selected' : ''}>Forfait</option>
+                    </select>
+                </div>
+                <div id="forfait-amount-container" class="mt-2 pl-7 w-full ${devisStatus !== 'Forfait' ? 'hidden' : ''}">
+                   <input type="number" id="modalMontantForfait" class="w-full p-1 border border-gray-300 rounded-md text-xs" placeholder="Montant Forfait (DH)" value="${task.montantForfait || ''}">
+                </div>
+            `;
         } else {
             item.className = 'flex items-center justify-between w-full';
             item.innerHTML = `
-                        <div class="flex items-center">
-                           <input id="${uniqueId}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                            <label for="${uniqueId}" class="ml-3 block text-sm text-gray-900">${key}</label>
-                        </div>
-                        <span class="text-xs text-gray-500">${formattedDate}</span>
-                    `;
+                <div class="flex items-center">
+                   <input id="${uniqueId}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                   <label for="${uniqueId}" class="ml-3 block text-sm text-gray-900">${key}</label>
+                </div>
+                <span class="text-xs text-gray-500">${formattedDate}</span>
+            `;
         }
         checklistContainer.appendChild(item);
     });
@@ -2775,7 +2830,6 @@ async function openModal(taskId) {
     const devisReasonContainer = document.getElementById('devis-reason-container');
     const forfaitAmountContainer = document.getElementById('forfait-amount-container');
     const devisStatusSelect = document.getElementById('devisStatusSelect');
-
     if (devisCheckbox && devisReasonContainer && forfaitAmountContainer && devisStatusSelect) {
         devisCheckbox.addEventListener('change', () => {
             devisReasonContainer.classList.toggle('hidden', devisCheckbox.checked);
@@ -2784,7 +2838,6 @@ async function openModal(taskId) {
                 if (devisStatusSelect.value === 'Forfait') devisStatusSelect.value = '';
             }
         });
-
         devisStatusSelect.addEventListener('change', () => {
             if (devisStatusSelect.value === 'Forfait') {
                 forfaitAmountContainer.classList.remove('hidden');
@@ -2804,33 +2857,29 @@ async function openModal(taskId) {
         const timestamp = checklist[key];
         const isChecked = !!timestamp;
         const formattedDate = isChecked ? `(le ${formatDateTime(timestamp)})` : '';
-
         item.innerHTML = `
-                <div class="flex items-center">
-                    <input id="check-${key.replace(/\s+/g, '-')}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <label for="check-${key.replace(/\s+/g, '-')}" class="ml-3 block text-sm font-semibold text-gray-900">${key}</label>
-                    <span class="ml-2 text-xs text-gray-500">${formattedDate}</span>
-                </div>
-                <button type="button" class="upload-step2-btn bg-blue-100 text-blue-700 text-xs font-bold py-1 px-3 rounded-full hover:bg-blue-200">Ajouter Photos</button>
-            `;
+            <div class="flex items-center">
+                <input id="check-${key.replace(/\s+/g, '-')}" data-item="${key}" type="checkbox" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <label for="check-${key.replace(/\s+/g, '-')}" class="ml-3 block text-sm font-semibold text-gray-900">${key}</label>
+                <span class="ml-2 text-xs text-gray-500">${formattedDate}</span>
+            </div>
+            <button type="button" class="upload-step2-btn bg-blue-100 text-blue-700 text-xs font-bold py-1 px-3 rounded-full hover:bg-blue-200">Ajouter Photos</button>
+        `;
         step2ChecklistContainer.appendChild(item);
     });
 
-    // Add this block to manage the new report section
     const reportSentSection = document.getElementById('reportSentSection');
     const reportSentCheckbox = document.getElementById('modalReportSent');
     const reportSentDateEl = document.getElementById('reportSentDate');
-
     if (normalizeString(getCleanedStatus(task.statut)).includes('termine')) {
         reportSentSection.classList.remove('hidden');
-        reportSentCheckbox.checked = !!task.rapportEnvoye; // Check the box if a date exists
+        reportSentCheckbox.checked = !!task.rapportEnvoye;
         reportSentDateEl.textContent = task.rapportEnvoye ? `(le ${new Date(task.rapportEnvoye).toLocaleDateString('fr-FR')})` : '';
     } else {
         reportSentSection.classList.add('hidden');
     }
     updateStepper(task);
 
-    // Add this block
     if (task.statut && task.statut.includes('❌ Annulé')) {
         cancelDossierBtn.classList.add('hidden');
         saveChangesBtn.disabled = true;
@@ -2838,7 +2887,6 @@ async function openModal(taskId) {
         cancelDossierBtn.classList.remove('hidden');
         saveChangesBtn.disabled = false;
     }
-
 
     fetchTaskActivity(taskId);
 
@@ -3736,17 +3784,13 @@ function createAdvancedTaskElement(task) {
     div.draggable = true;
     div.dataset.id = task.ID;
 
-    // --- FIX IS HERE: Define linkedDossier ONCE at the top ---
     const linkedDossier = allTasksData.find(d => d.id === task.DossierID);
-    const isTimerActive = linkedDossier ? linkedDossier.isTimerActive : false;
-    const isInitialOverdue = linkedDossier ? linkedDossier.isInitialTaskOverdue : false;
-    const receptionDate = linkedDossier ? linkedDossier.dateReception : null;
-    const initialOverdueBadge = isInitialOverdue ? `<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">EN RETARD</span>` : '';
-    // --- End of fix ---
+    const is48hOverdue = linkedDossier ? linkedDossier.is48hOverdue : false;
+    const overdue48hBadge = is48hOverdue ? `<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">EN RETARD (48h)</span>` : '';
+    const isTimerActive = task.Status === 'En Cours' && task.InProgressTimestamp;
 
     const priorityClasses = { 'Haute': 'bg-red-500', 'Moyenne': 'bg-yellow-500', 'Basse': 'bg-green-500' };
     const priorityColor = priorityClasses[task.Priority] || 'bg-gray-400';
-
     const deadline = task.Deadline ? new Date(task.Deadline) : null;
     const isOverdue = deadline && new Date() > deadline && task.Status !== 'Terminé';
     const subtasks = task.Subtasks || [];
@@ -3757,13 +3801,13 @@ function createAdvancedTaskElement(task) {
 
     div.innerHTML = `
         <div class="flex justify-between items-start mb-2">
-            <h3 class="font-bold text-base text-gray-800 flex items-center gap-2">${task.Title} ${initialOverdueBadge}</h3>
+            <h3 class="font-bold text-base text-gray-800 flex items-center gap-2">${task.Title} ${overdue48hBadge}</h3>
             <img src="${agentImg}" alt="${task.Assignee}" class="w-8 h-8 rounded-full object-cover border-2 border-white ring-1 ring-gray-200" title="${task.Assignee || 'Non assigné'}">
         </div>
         <p class="text-sm text-gray-600 mb-3">${task.Description || ''}</p>
         
         ${isTimerActive ? `
-        <div class="countdown-timer flex items-center justify-center gap-1.5 text-sm font-bold p-1.5 rounded-md mb-3" data-reception-date="${receptionDate}">
+        <div class="countdown-timer flex items-center justify-center gap-1.5 text-sm font-bold p-1.5 rounded-md mb-3" data-start-time="${task.InProgressTimestamp}">
         </div>` : ''}
 
         ${subtasks.length > 0 ? `
@@ -3828,7 +3872,12 @@ async function addOrUpdateAdvancedTask(taskData) {
         if (result.status !== 'success') throw new Error(result.message);
 
         await fetchAdvancedTasks();
-        closeAdvancedTaskModal();
+        closeAdvancedTaskModal();
+
+        // NEW: Refresh calendar if it's the active page
+        if (!calendarPage.classList.contains('hidden')) {
+            renderCalendar(calendarDate.getFullYear(), calendarDate.getMonth());
+        }
 
     } catch (error) {
         showError(`Erreur lors de la sauvegarde: ${error.message}`);
@@ -3965,11 +4014,11 @@ function renderCalendar(year, month) {
         year: 'numeric'
     });
 
-    const selectedAgent = calendarAgentFilter.value; // Read the filter value
+    const isPrivilegedUser = currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner';
+    const selectedAgent = isPrivilegedUser ? calendarAgentFilter.value : currentUser.name;
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-
     let startingDay = firstDay.getDay() - 1;
     if (startingDay < 0) startingDay = 6;
 
@@ -3989,7 +4038,7 @@ function renderCalendar(year, month) {
 
         const eventsContainer = dayCell.querySelector('div:last-child');
 
-        // Filter Dossiers by agent
+        // Filter Dossiers by selected agent
         allTasksData.filter(task => (selectedAgent === 'all' || task.agent === selectedAgent) && task.dateLimite && new Date(task.dateLimite).toDateString() === currentDate.toDateString())
             .forEach(task => {
                 const eventEl = document.createElement('div');
@@ -3999,7 +4048,7 @@ function renderCalendar(year, month) {
                 eventsContainer.appendChild(eventEl);
             });
 
-        // Filter Tâches by agent
+        // Filter Tâches by selected agent
         advancedTasks.filter(task => (selectedAgent === 'all' || task.Assignee === selectedAgent) && task.Deadline && new Date(task.Deadline).toDateString() === currentDate.toDateString())
             .forEach(task => {
                 const eventEl = document.createElement('div');
@@ -4009,20 +4058,22 @@ function renderCalendar(year, month) {
                 eventsContainer.appendChild(eventEl);
             });
 
-        // Filter Calendar Events by agent (Holidays always show)
+        // Filter Calendar Events (Holidays always show for everyone)
         calendarEvents.forEach(event => {
             const startDate = new Date(event.StartDate);
             const endDate = new Date(event.EndDate);
-            const isHoliday = event.Type === 'Férié';
-            const isRelevantVacation = event.Type === 'Vacances' && (selectedAgent === 'all' || event.UserID === selectedAgent);
+            if (currentDate >= startDate && currentDate <= endDate) {
+                const isHoliday = event.Type === 'Férié';
+                const isRelevantVacation = event.Type === 'Vacances' && (selectedAgent === 'all' || event.UserID === selectedAgent);
 
-            if ((isHoliday || isRelevantVacation) && currentDate >= startDate && currentDate <= endDate) {
-                const eventEl = document.createElement('div');
-                const eventClass = event.Type === 'Vacances' ? 'event-vacation' : 'event-holiday';
-                eventEl.className = `calendar-task ${eventClass}`;
-                eventEl.textContent = `${event.Title} (${event.UserID === 'all' ? 'Tous' : event.UserID})`;
-                eventEl.dataset.eventId = event.ID;
-                eventsContainer.appendChild(eventEl);
+                if (isHoliday || isRelevantVacation) {
+                    const eventEl = document.createElement('div');
+                    const eventClass = event.Type === 'Vacances' ? 'event-vacation' : 'event-holiday';
+                    eventEl.className = `calendar-task ${eventClass}`;
+                    eventEl.textContent = `${event.Title} (${event.UserID === 'all' ? 'Tous' : event.UserID})`;
+                    eventEl.dataset.eventId = event.ID;
+                    eventsContainer.appendChild(eventEl);
+                }
             }
         });
 
@@ -4382,6 +4433,9 @@ importModal.addEventListener('click', (e) => {
 globalSearchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const searchTerm = globalSearchInput.value.trim();
+        modalAgentAssign.addEventListener('change', (e) => {
+    checkAgentAvailability(e.target.value);
+    });
         if (searchTerm) {
             // Navigate to the dossiers page
             showPage('dossiersPage');
