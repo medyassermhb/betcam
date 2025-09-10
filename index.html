@@ -241,6 +241,28 @@
             background-color: #f9fafb;
             color: #9ca3af;
         }
+
+        /* New Styles for Mobile Calendar List View */
+        .calendar-list-day {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .calendar-list-day-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .calendar-list-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
         /* Stats Page Styles */
         .stats-tab {
             padding: 8px 16px;
@@ -562,8 +584,8 @@
                                 </button>
                             </div>
                     </header>
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-                        <div class="grid grid-cols-7 text-center font-bold text-gray-600 border-b">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="hidden lg:grid grid-cols-7 text-center font-bold text-gray-600 border-b">
                             <div class="p-3">Lundi</div>
                             <div class="p-3">Mardi</div>
                             <div class="p-3">Mercredi</div>
@@ -572,8 +594,10 @@
                             <div class="p-3">Samedi</div>
                             <div class="p-3">Dimanche</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-7">
-                        </div>
+                        <div id="calendarGrid" class="hidden lg:grid grid-cols-7">
+                            </div>
+                        <div id="calendarList" class="lg:hidden">
+                            </div>
                     </div>
                 </div>
     
@@ -1245,7 +1269,7 @@
     
     <script type="module">
 // --- CONFIGURATION ---
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzZweQKrqjSZiKxEO0qwSCRT5mtTQl0UpFxYVIxh6eoVVyDm7yAC5WC9Lvu3kimtEjg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBBHd_hY7Y2qhf1NHrIxzXBaf8cw8FZvLhFP6w_TcFDNmSG2NqllKErrbRu1IhxEB8/exec';
 const MISSION_DURATION_MIN = 30; // Temps estimé par mission en minutes
 const WORK_DAY_HOURS = 8; // Heures de travail par jour
 
@@ -1915,13 +1939,14 @@ function updateDashboard() {
     today.setHours(0, 0, 0, 0);
     const overdueTasks = tasksData.filter(t => {
         const isCompleted = normalizeString(getCleanedStatus(t.statut)).includes('termine');
-        if (isCompleted || !t.dateLimite) return false;
-
-        if (t.devisStatus === "Client n'a pas envoyé") {
-            return false;
+        if (isCompleted) {
+            return false; // Completed tasks are never overdue.
         }
 
-        return new Date(t.dateLimite) < today;
+        // A task is overdue if its initial 48h period has passed OR its final deadline has passed.
+        const isPastFinalDeadline = t.dateLimite && (new Date(t.dateLimite) < today);
+        
+        return t.is48hOverdue || isPastFinalDeadline;
     });
     const statOverdueEl = document.getElementById('statOverdue');
     if (statOverdueEl) statOverdueEl.textContent = overdueTasks.length;
@@ -4332,11 +4357,12 @@ async function handleAdvancedTaskFormSubmit(e) {
 
 // --- CALENDAR FUNCTIONS ---
 function renderCalendar(year, month) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarList = document.getElementById('calendarList');
     calendarGrid.innerHTML = '';
-    monthYearEl.textContent = new Date(year, month).toLocaleDateString('fr-FR', {
-        month: 'long',
-        year: 'numeric'
-    });
+    calendarList.innerHTML = ''; // Clear both views
+
+    monthYearEl.textContent = new Date(year, month).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
     const isPrivilegedUser = currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner';
     const selectedAgent = isPrivilegedUser ? calendarAgentFilter.value : currentUser.name;
@@ -4346,62 +4372,109 @@ function renderCalendar(year, month) {
     let startingDay = firstDay.getDay() - 1;
     if (startingDay < 0) startingDay = 6;
 
+    // --- RENDER DESKTOP GRID VIEW ---
     for (let i = 0; i < startingDay; i++) {
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-day border-t border-l p-2 day-other-month';
         calendarGrid.appendChild(emptyCell);
     }
 
+    const allMonthEvents = []; // Collect all events for the list view
+
     for (let day = 1; day <= lastDay.getDate(); day++) {
-        const dayCell = document.createElement('div');
         const currentDate = new Date(year, month, day);
-        const isToday = currentDate.toDateString() === new Date().toDateString();
+        const dayEvents = [];
 
-        dayCell.className = `calendar-day border-t border-l p-2 relative ${isToday ? 'bg-blue-50' : ''}`;
-        dayCell.innerHTML = `<div class="text-sm font-semibold ${isToday ? 'text-blue-600' : ''}">${day}</div><div class="mt-1 space-y-1"></div>`;
-
-        const eventsContainer = dayCell.querySelector('div:last-child');
-
-        // Filter Dossiers by selected agent
+        // Filter and collect all items for the current day
         allTasksData.filter(task => (selectedAgent === 'all' || task.agent === selectedAgent) && task.dateLimite && new Date(task.dateLimite).toDateString() === currentDate.toDateString())
-            .forEach(task => {
-                const eventEl = document.createElement('div');
-                eventEl.className = 'calendar-task event-dossier';
-                eventEl.textContent = `Dossier: ${task.ref}`;
-                eventEl.dataset.taskId = task.id;
-                eventsContainer.appendChild(eventEl);
-            });
-
-        // Filter Tâches by selected agent
+            .forEach(task => dayEvents.push({ type: 'dossier', item: task }));
+        
         advancedTasks.filter(task => (selectedAgent === 'all' || task.Assignee === selectedAgent) && task.Deadline && new Date(task.Deadline).toDateString() === currentDate.toDateString())
-            .forEach(task => {
-                const eventEl = document.createElement('div');
-                eventEl.className = 'calendar-task event-task';
-                eventEl.textContent = `Tâche: ${task.Title}`;
-                eventEl.dataset.advancedTaskId = task.ID;
-                eventsContainer.appendChild(eventEl);
-            });
+            .forEach(task => dayEvents.push({ type: 'task', item: task }));
 
-        // Filter Calendar Events (Holidays always show for everyone)
         calendarEvents.forEach(event => {
             const startDate = new Date(event.StartDate);
             const endDate = new Date(event.EndDate);
             if (currentDate >= startDate && currentDate <= endDate) {
                 const isHoliday = event.Type === 'Férié';
                 const isRelevantVacation = event.Type === 'Vacances' && (selectedAgent === 'all' || event.UserID === selectedAgent);
-
                 if (isHoliday || isRelevantVacation) {
-                    const eventEl = document.createElement('div');
-                    const eventClass = event.Type === 'Vacances' ? 'event-vacation' : 'event-holiday';
-                    eventEl.className = `calendar-task ${eventClass}`;
-                    eventEl.textContent = `${event.Title} (${event.UserID === 'all' ? 'Tous' : event.UserID})`;
-                    eventEl.dataset.eventId = event.ID;
-                    eventsContainer.appendChild(eventEl);
+                    dayEvents.push({ type: event.Type === 'Vacances' ? 'vacation' : 'holiday', item: event });
                 }
             }
         });
 
+        allMonthEvents.push({ date: currentDate, events: dayEvents }); // Add to month's events for list view
+
+        // Populate the desktop grid cell
+        const dayCell = document.createElement('div');
+        const isToday = currentDate.toDateString() === new Date().toDateString();
+        dayCell.className = `calendar-day border-t border-l p-2 relative ${isToday ? 'bg-blue-50' : ''}`;
+        dayCell.innerHTML = `<div class="text-sm font-semibold ${isToday ? 'text-blue-600' : ''}">${day}</div><div class="mt-1 space-y-1"></div>`;
+        const gridEventsContainer = dayCell.querySelector('div:last-child');
+
+        dayEvents.forEach(eventData => {
+            const eventEl = document.createElement('div');
+            eventEl.className = 'calendar-task';
+            if (eventData.type === 'dossier') {
+                eventEl.classList.add('event-dossier');
+                eventEl.textContent = `Dossier: ${eventData.item.ref}`;
+                eventEl.dataset.taskId = eventData.item.id;
+            } else if (eventData.type === 'task') {
+                eventEl.classList.add('event-task');
+                eventEl.textContent = `Tâche: ${eventData.item.Title}`;
+                eventEl.dataset.advancedTaskId = eventData.item.ID;
+            } else if (eventData.type === 'vacation') {
+                eventEl.classList.add('event-vacation');
+                eventEl.textContent = `${eventData.item.Title} (${eventData.item.UserID})`;
+                eventEl.dataset.eventId = eventData.item.ID;
+            } else if (eventData.type === 'holiday') {
+                eventEl.classList.add('event-holiday');
+                eventEl.textContent = eventData.item.Title;
+                eventEl.dataset.eventId = eventData.item.ID;
+            }
+            gridEventsContainer.appendChild(eventEl);
+        });
         calendarGrid.appendChild(dayCell);
+    }
+
+    // --- RENDER MOBILE LIST VIEW ---
+    allMonthEvents.filter(dayData => dayData.events.length > 0).forEach(dayData => {
+        const dayContainer = document.createElement('div');
+        dayContainer.className = 'calendar-list-day';
+
+        const dayHeader = document.createElement('h3');
+        dayHeader.className = 'calendar-list-day-header';
+        dayHeader.textContent = dayData.date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        dayContainer.appendChild(dayHeader);
+
+        dayData.events.forEach(eventData => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'calendar-list-item';
+             if (eventData.type === 'dossier') {
+                itemEl.classList.add('event-dossier');
+                itemEl.textContent = `Dossier: ${eventData.item.ref} (${eventData.item.agent})`;
+                itemEl.dataset.taskId = eventData.item.id;
+            } else if (eventData.type === 'task') {
+                itemEl.classList.add('event-task');
+                itemEl.textContent = `Tâche: ${eventData.item.Title} (${eventData.item.Assignee})`;
+                itemEl.dataset.advancedTaskId = eventData.item.ID;
+            } else if (eventData.type === 'vacation') {
+                itemEl.classList.add('event-vacation');
+                itemEl.textContent = `${eventData.item.Title} (${eventData.item.UserID})`;
+                itemEl.dataset.eventId = eventData.item.ID;
+            } else if (eventData.type === 'holiday') {
+                itemEl.classList.add('event-holiday');
+                itemEl.textContent = `${eventData.item.Title} (Tous)`;
+                itemEl.dataset.eventId = eventData.item.ID;
+            }
+            dayContainer.appendChild(itemEl);
+        });
+        calendarList.appendChild(dayContainer);
+    });
+
+    if (calendarList.innerHTML === '') {
+        calendarList.innerHTML = `<p class="p-8 text-center text-gray-500">Aucun événement ce mois-ci.</p>`;
     }
 }
 
