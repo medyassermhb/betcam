@@ -83,6 +83,30 @@
             margin-left: 6px;
         }
 
+        .overdue-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-left-width: 4px;
+            transition: background-color 0.2s;
+        }
+        .overdue-card-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+        .overdue-card-tag {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            white-space: nowrap;
+        }
+
         /* New Styles for Mobile Kanban Tabs */
         .kanban-tab {
             padding: 1rem;
@@ -446,57 +470,46 @@
             <main class="p-4 md:p-6 lg:p-8">
                 <div id="dashboardPage">
                     <h1 class="text-3xl font-bold text-gray-900 mb-6">Tableau de Bord Analytique</h1>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div id="statCardTotal" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.1s;">
-                            <h3 class="text-sm font-medium text-gray-500">Dossiers Totaux</h3>
-                            <p id="statTotal" class="text-3xl font-bold text-gray-900 mt-2">0</p>
-                        </div>
-                        <div id="statCard48hOverdue" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-red-200 hover:border-red-500 transition" style="animation-delay: 0.5s;">
-                            <h3 class="text-sm font-medium text-gray-500">En Retard (48h)</h3>
-                            <p id="stat48hOverdue" class="text-3xl font-bold text-red-600 mt-2">0</p>
-                        </div>
-                        <div id="statCardCompleted" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.2s;">
-                            <h3 class="text-sm font-medium text-gray-500">Dossiers Terminés</h3>
-                            <p id="statCompleted" class="text-3xl font-bold text-green-600 mt-2">0</p>
-                        </div>
-                        <div id="statCardInProgress" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.3s;">
-                            <h3 class="text-sm font-medium text-gray-500">Dossiers en Cours</h3>
-                            <p id="statInProgress" class="text-3xl font-bold text-orange-500 mt-2">0</p>
-                        </div>
-                         <div id="statCardTodo" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.4s;">
-                            <h3 class="text-sm font-medium text-gray-500">Dossiers à Faire</h3>
-                            <p id="statTodo" class="text-3xl font-bold text-gray-600 mt-2">0</p>
-                        </div>
-                    </div>
-    
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                        <div id="statCardOverdue" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-red-200 hover:border-red-500 transition" style="animation-delay: 0.5s;">
-                                 <h3 class="text-sm font-medium text-gray-500">Dossiers en Retard</h3>
-                                 <p id="statOverdue" class="text-3xl font-bold text-red-600 mt-2">0</p>
-                        </div>
-                        <div id="statCardHighDevis" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-red-500 transition" style="animation-delay: 0.6s;">
-                            <h3 class="text-sm font-medium text-gray-500">Devis > 20k DH</h3>
-                            <p id="statHighDevis" class="text-3xl font-bold text-red-600 mt-2">0</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200" style="animation-delay: 0.7s;">
-                                 <h3 class="text-sm font-medium text-gray-500">Délai Moyen de Clôture</h3>
-                                 <p id="statAvgCompletion" class="text-3xl font-bold text-blue-600 mt-2">N/A</p>
-                        </div>
-                    </div>
-    
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="dashboard-panel lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200" style="animation-delay: 0.8s;">
-                            <h3 class="text-lg font-semibold mb-4">Performance par Agent</h3>
-                            <div id="agentKpiContainer" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-                                <!-- Agent KPI cards will be injected here by JavaScript -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+                            <div id="statCardTotal" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.1s;">
+                                <h3 class="text-sm font-medium text-gray-500">Dossiers Totaux</h3>
+                                <p id="statTotal" class="text-3xl font-bold text-gray-900 mt-2">0</p>
+                            </div>
+                            <div id="statCardCompleted" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.2s;">
+                                <h3 class="text-sm font-medium text-gray-500">Dossiers Terminés</h3>
+                                <p id="statCompleted" class="text-3xl font-bold text-green-600 mt-2">0</p>
+                            </div>
+                            <div id="statCardInProgress" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition" style="animation-delay: 0.3s;">
+                                <h3 class="text-sm font-medium text-gray-500">Dossiers en Cours</h3>
+                                <p id="statInProgress" class="text-3xl font-bold text-orange-500 mt-2">0</p>
+                            </div>
+                            <div id="statCard48hOverdue" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-red-200 hover:border-red-500 transition" style="animation-delay: 0.4s;">
+                                <h3 class="text-sm font-medium text-gray-500">En Retard (48h)</h3>
+                                <p id="stat48hOverdue" class="text-3xl font-bold text-red-600 mt-2">0</p>
+                            </div>
+                             <div id="statCardHighDevis" class="stat-card bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:border-red-500 transition" style="animation-delay: 0.5s;">
+                                <h3 class="text-sm font-medium text-gray-500">Devis > 20k DH</h3>
+                                <p id="statHighDevis" class="text-3xl font-bold text-red-600 mt-2">0</p>
                             </div>
                         </div>
-                        <div class="dashboard-panel bg-white p-6 rounded-xl shadow-sm border border-gray-200" style="animation-delay: 0.9s;">
-                                 <h3 class="text-lg font-semibold mb-4">Dossiers en Retard</h3>
-                                 <div id="overdueTasksList" class="space-y-3 max-h-80 overflow-y-auto">
-                                     </div>
+    
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                            <div class="dashboard-panel lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200" style="animation-delay: 0.8s;">
+                                <h3 class="text-lg font-semibold mb-4">Performance par Agent</h3>
+                                <div id="agentKpiContainer" class="space-y-4">
+                                    </div>
+                            </div>
+
+                            <div class="dashboard-panel bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col h-96" style="animation-delay: 0.9s;">
+                                <div class="flex justify-between items-center mb-2 flex-shrink-0">
+                                    <h3 class="text-lg font-semibold">Dossiers en Retard</h3>
+                                    <select id="overdueMonthFilter" class="text-sm border-gray-300 rounded-lg shadow-sm p-1">
+                                    </select>
+                                </div>
+                                <div id="overdueTasksList" class="space-y-3 overflow-y-auto">
+                                    </div>
+                            </div>
                         </div>
-                    </div>
                 </div>
     
                 <div id="productivityPage" class="hidden">
@@ -603,56 +616,60 @@
     
                 <div id="dossiersPage" class="hidden">
                      <div class="container mx-auto">
-                        <header class="mb-8">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h1 class="text-3xl font-bold text-gray-900">Suivi des Dossiers d'Accident</h1>
-                                    <p class="text-gray-600 mt-1">Tableau de bord pour le suivi des missions des agents.</p>
+                        <div class="sticky top-16 z-10 bg-gray-100 py-4 mb-6">
+                            <header>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h1 class="text-3xl font-bold text-gray-900">Suivi des Dossiers d'Accident</h1>
+                                        <p class="text-gray-600 mt-1">Tableau de bord pour le suivi des missions des agents.</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button id="importBtn" class="hidden bg-white text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center shadow-sm border border-gray-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                                            Importer
+                                        </button>
+                                        <button id="addTaskBtn" class="hidden bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                            Ajouter Dossier
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="flex space-x-2">
-                                     <button id="importBtn" class="hidden bg-white text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-300 flex items-center shadow-sm border border-gray-300">
-                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                         </svg>
-                                         Importer
-                                     </button>
-                                     <button id="addTaskBtn" class="hidden bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center shadow-sm">
-                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                                         </svg>
-                                         Ajouter Dossier
-                                     </button>
-                                </div>
-                            </div>
-                        </header>
-                        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div class="lg:col-span-2">
-                                     <label for="search" class="sr-only">Rechercher</label>
-                                     <input type="text" id="search" placeholder="Rechercher par Réf, Assuré, Matricule, Marque..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                </div>
-                                <div>
-                                    <label for="agentFilter" class="sr-only">Filtrer par agent</label>
-                                    <select id="agentFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                        <option value="all">Tous les agents</option>
-                                    </select>
-                                </div>
-                                <div>
-                                   <label for="companyFilter" class="sr-only">Filtrer par compagnie</label>
-                                    <select id="companyFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                        <option value="all">Toutes les compagnies</option>
-                                    </select>
-                                </div>
-                                 <div class="lg:col-start-3">
-                                   <label for="statusFilter" class="sr-only">Filtrer par statut</label>
-                                    <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                        <option value="all">Tous les statuts</option>
-                                        <option value="Terminé">Terminé</option>
-                                        <option value="inachevee">En cours</option>
-                                        <option value="À faire">À faire</option>
-                                        <option value="Annulé">Annulé</option>
-                                        <option value="48hOverdue" class="text-red-600 font-medium">En Retard (48h)</option>
-                                    </select>
+                            </header>
+                            <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-200 mt-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                                    <div class="lg:col-span-2">
+                                        <label for="search" class="sr-only">Rechercher</label>
+                                        <input type="text" id="search" placeholder="Rechercher par Réf, Assuré, Matricule..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    </div>
+                                    <div>
+                                        <label for="agentFilter" class="sr-only">Filtrer par agent</label>
+                                        <select id="agentFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition agent-dropdown">
+                                            <option value="all">Tous les agents</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="companyFilter" class="sr-only">Filtrer par compagnie</label>
+                                        <select id="companyFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <option value="all">Toutes les compagnies</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="monthFilter" class="sr-only">Filtrer par mois</label>
+                                        <select id="monthFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <option value="all">Tous les mois</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label for="statusFilter" class="sr-only">Filtrer par statut</label>
+                                        <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                            <option value="all">Tous les statuts</option>
+                                            <option value="Terminé">Terminé</option>
+                                            <option value="inachevee">En cours</option>
+                                            <option value="À faire">À faire</option>
+                                            <option value="Annulé">Annulé</option>
+                                            <option value="48hOverdue" class="text-red-600 font-medium">En Retard (48h)</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -667,8 +684,8 @@
                     </div>
                 </div>
                 
-<div id="advancedTasksPage" class="hidden">
-    <header class="mb-6">
+                <div id="advancedTasksPage" class="hidden">
+<header class="mb-6">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">Tâches</h1>
@@ -679,69 +696,75 @@
                 Ajouter une Tâche
             </button>
         </div>
-            <div id="advancedTaskFilterBar" class="mt-6 p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center gap-3">
-                <div class="relative w-full sm:w-auto flex-grow">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
-                </div>
-                <input type="text" id="advancedTaskSearch" class="w-full border-gray-300 rounded-lg pl-10" placeholder="Rechercher par titre...">
+        <div id="tachesFilterBar" class="mt-6 p-3 bg-white rounded-xl border border-gray-200 grid grid-cols-2 md:grid-cols-5 gap-3 items-center">
+            <div class="col-span-2 md:col-span-1">
+                <label for="tachesAgentFilter" class="block text-xs font-medium text-gray-500">Agent</label>
+                    <select id="tachesAgentFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm agent-dropdown"></select>
+                </select>
             </div>
-            <select id="advancedTaskAssigneeFilter" class="w-full sm:w-auto border-gray-300 rounded-lg">
-                <option value="all">Tous les agents</option>
-            </select>
-            <select id="advancedTaskPriorityFilter" class="w-full sm:w-auto border-gray-300 rounded-lg">
-                <option value="all">Toute priorité</option>
-                <option value="Haute">Haute</option>
-                <option value="Moyenne">Moyenne</option>
-                <option value="Basse">Basse</option>
-            </select>
-            <div class="w-full sm:w-auto flex items-center gap-2 justify-center">
-                <input type="checkbox" id="urgentFilter" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <label for="urgentFilter" class="text-sm font-medium text-gray-700 whitespace-nowrap">Échéance Proche</label>
+            <div>
+                <label for="tachesStartDateFilter" class="block text-xs font-medium text-gray-500">Depuis le</label>
+                <input type="date" id="tachesStartDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+            </div>
+            <div>
+                <label for="tachesEndDateFilter" class="block text-xs font-medium text-gray-500">Jusqu'au</label>
+                <input type="date" id="tachesEndDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+            </div>
+            <div>
+                <label for="tachesSortControl" class="block text-xs font-medium text-gray-500">Trier par</label>
+                <select id="tachesSortControl" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+                    <option value="deadline-asc">Plus Ancien au Plus Récent</option>
+                    <option value="deadline-desc">Plus Récent au Plus Ancien</option>
+                </select>
+            </div>
+            <div class="col-span-2 md:col-span-1">
+                 <label class="block text-xs font-medium text-transparent">.</label>
+                <button id="resetTachesFilters" class="mt-1 w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Réinitialiser</button>
             </div>
         </div>
     </header>
 
-    <div id="kanban-tabs-mobile" class="lg:hidden mb-4 border-b border-gray-200">
-        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-            <button data-col="todo-col" class="kanban-tab active">
-                À Faire (<span id="mobile-todo-count">0</span>)
-            </button>
-            <button data-col="inprogress-col" class="kanban-tab">
-                En Cours (<span id="mobile-inprogress-count">0</span>)
-            </button>
-            <button data-col="done-col" class="kanban-tab">
-                Terminé (<span id="mobile-done-count">0</span>)
-            </button>
-        </nav>
-    </div>
+                    <div id="kanban-tabs-mobile" class="lg:hidden mb-4 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button data-col="todo-col" class="kanban-tab active">
+                                À Faire (<span id="mobile-todo-count">0</span>)
+                            </button>
+                            <button data-col="inprogress-col" class="kanban-tab">
+                                En Cours (<span id="mobile-inprogress-count">0</span>)
+                            </button>
+                            <button data-col="done-col" class="kanban-tab">
+                                Terminé (<span id="mobile-done-count">0</span>)
+                            </button>
+                        </nav>
+                    </div>
 
-        <div id="kanban-container" class="lg:grid lg:grid-cols-3 lg:gap-6">
-            <div class="bg-gray-50 rounded-xl p-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-bold text-lg text-gray-800">À Faire</h2>
-                <span id="todo-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
-            </div>
-            <div id="todo-col" class="task-column space-y-4 min-h-[400px]"></div>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-bold text-lg text-gray-800">En Cours</h2>
-                <span id="inprogress-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
-            </div>
-            <div id="inprogress-col" class="task-column space-y-4 min-h-[400px]"></div>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-bold text-lg text-gray-800">Terminé</h2>
-                <span id="done-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
-            </div>
-            <div id="done-col" class="task-column space-y-4 min-h-[400px]"></div>
-        </div>
-    </div>
-</div>
-        
-        
+                <div id="kanban-container" class="lg:grid lg:grid-cols-3 lg:gap-6 h-[70vh]">
+                        <div class="bg-gray-50 rounded-xl p-4 flex flex-col">
+                            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                                <h2 class="font-bold text-lg text-gray-800">À Faire</h2>
+                                <span id="todo-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
+                            </div>
+                            <div id="todo-col" class="task-column space-y-4 overflow-y-auto pr-2 h-[60vh]"></div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-4 flex flex-col">
+                            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                                <h2 class="font-bold text-lg text-gray-800">En Cours</h2>
+                                <span id="inprogress-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
+                            </div>
+                            <div id="inprogress-col" class="task-column space-y-4 overflow-y-auto pr-2 h-[60vh]"></div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-4 flex flex-col">
+                            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                                <h2 class="font-bold text-lg text-gray-800">Terminé</h2>
+                                <span id="done-count" class="text-sm font-semibold text-gray-500 bg-gray-200 px-2 py-1 rounded-full">0</span>
+                            </div>
+                            <div id="done-col" class="task-column space-y-4 overflow-y-auto pr-2 h-[60vh]"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="adminPage" class="hidden">
                     <div class="container mx-auto">
                         <header class="mb-8 flex justify-between items-center">
@@ -1243,7 +1266,6 @@
             </form>
         </div>
     </div>
-
     <div id="fileActionSheet" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-end z-[70]">
         <div id="fileActionSheetContent" class="bg-white w-full rounded-t-2xl p-4 transform translate-y-full transition-transform duration-300">
             <h3 class="text-lg font-bold text-gray-800 text-center mb-4">Ajouter un Fichier</h3>
@@ -1269,7 +1291,7 @@
     
     <script type="module">
 // --- CONFIGURATION ---
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBBHd_hY7Y2qhf1NHrIxzXBaf8cw8FZvLhFP6w_TcFDNmSG2NqllKErrbRu1IhxEB8/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzamMlIynj49doPHdbERLZJ6S8jxDP--y5qzecvQNnh2CpVRW1WflGbBPrr--F-rWRP/exec';
 const MISSION_DURATION_MIN = 30; // Temps estimé par mission en minutes
 const WORK_DAY_HOURS = 8; // Heures de travail par jour
 
@@ -1284,8 +1306,10 @@ let notifications = [];
 let notificationInterval = null;
 let advancedTasks = [];
 let calendarDate = new Date();
-let productivityCharts = {};
 let calendarEvents = [];
+let productivityCharts = {}; // Add this line
+let overdueTasks = []; // To store the master list of overdue tasks
+// let calendarEvents = [];
 let statsCharts = {}; // Changed to an object to hold multiple charts
 // let companiesData = [];
 let unavailableAgentsToday = [];
@@ -1381,14 +1405,6 @@ const advancedTaskModal = document.getElementById('advancedTaskModal');
 const closeAdvancedTaskModalBtn = document.getElementById('closeAdvancedTaskModal'); // The variable for the button
 const advancedTaskForm = document.getElementById('advancedTaskForm');
 const deleteAdvancedTaskBtn = document.getElementById('deleteAdvancedTaskBtn');
-
-// New variables for redesigned Tâches page
-const advancedTaskSearch = document.getElementById('advancedTaskSearch');
-const advancedTaskPriorityFilter = document.getElementById('advancedTaskPriorityFilter');
-const todoCount = document.getElementById('todo-count');
-const inprogressCount = document.getElementById('inprogress-count');
-const doneCount = document.getElementById('done-count');
-const advancedTaskFilterBar = document.getElementById('advancedTaskFilterBar');
 
 const statCardHighDevis = document.getElementById('statCardHighDevis');
 const statHighDevis = document.getElementById('statHighDevis');
@@ -1491,13 +1507,22 @@ async function fetchUnavailableAgents() {
 function updateAllTimers() {
     const timerElements = document.querySelectorAll('.countdown-timer');
     timerElements.forEach(timerEl => {
-        const startTime = new Date(timerEl.dataset.startTime);
+        const taskId = timerEl.dataset.taskId;
+        const task = advancedTasks.find(t => t.ID === taskId);
+        if (!task || !task.InProgressTimestamp) {
+            timerEl.innerHTML = '';
+            return;
+        }
+
+        const startTime = new Date(task.InProgressTimestamp);
         if (isNaN(startTime)) return;
 
-        const thirtyMinutesInMillis = 30 * 60 * 1000;
-        const endTime = startTime.getTime() + thirtyMinutesInMillis;
-        const now = new Date().getTime();
-        const timeLeft = endTime - now;
+        const timeAlreadySpent = task.TimeSpentMillis || 0;
+        const timeBudgetMillis = MISSION_DURATION_MIN * 60 * 1000;
+
+        const currentSessionMillis = new Date().getTime() - startTime.getTime();
+        const totalTimeSpent = timeAlreadySpent + currentSessionMillis;
+        const timeLeft = timeBudgetMillis - totalTimeSpent;
 
         if (timeLeft > 0) {
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
@@ -1506,6 +1531,7 @@ function updateAllTimers() {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
                 <span>${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</span>
             `;
+            timerEl.classList.remove('text-red-600', 'bg-red-100');
             timerEl.classList.add('text-orange-600', 'bg-orange-100');
         } else {
             timerEl.innerHTML = `
@@ -1520,18 +1546,49 @@ function updateAllTimers() {
 
 
 // --- PAGE NAVIGATION ---
-function showPage(pageId) {
+function showPage(pageId, fromPopState = false) {
     const pages = [dashboardPage, dossiersPage, advancedTasksPage, adminPage, productivityPage, calendarPage, statsPage, facturationPage];
     pages.forEach(p => p.classList.add('hidden'));
 
     document.getElementById(pageId).classList.remove('hidden');
 
     if (pageId === 'advancedTasksPage') {
-        const isPrivilegedUser = currentUser.role.toLowerCase() === 'admin' || currentUser.role.toLowerCase() === 'assigner';
-        // Toggle visibility of the entire filter bar based on user role
-        advancedTaskFilterBar.classList.toggle('hidden', !isPrivilegedUser);
-        fetchAdvancedTasks();
-    }    
+        renderAdvancedTasks();
+        const tachesPageElement = document.getElementById('advancedTasksPage');
+
+        // Attach listeners for the new filter bar only once
+        if (tachesPageElement && !tachesPageElement.dataset.listenersAttached) {
+            document.getElementById('tachesAgentFilter').addEventListener('change', renderAdvancedTasks);
+            document.getElementById('tachesStartDateFilter').addEventListener('change', renderAdvancedTasks);
+            document.getElementById('tachesEndDateFilter').addEventListener('change', renderAdvancedTasks);
+            document.getElementById('tachesSortControl').addEventListener('change', renderAdvancedTasks);
+            
+            document.getElementById('resetTachesFilters').addEventListener('click', () => {
+                document.getElementById('tachesAgentFilter').value = 'all';
+                document.getElementById('tachesStartDateFilter').value = '';
+                document.getElementById('tachesEndDateFilter').value = '';
+                document.getElementById('tachesSortControl').value = 'deadline-asc';
+                renderAdvancedTasks();
+            });
+
+            // Mobile status change listener
+            const kanbanContainer = document.getElementById('kanban-container');
+            if (kanbanContainer) {
+                kanbanContainer.addEventListener('change', async (e) => {
+                    if (e.target.classList.contains('mobile-status-select')) {
+                        const taskId = e.target.dataset.taskId;
+                        const newStatus = e.target.value;
+                        loadingSpinner.classList.remove('hidden');
+                        await updateAdvancedTaskStatus(taskId, newStatus);
+                        await fetchAdvancedTasks();
+                        loadingSpinner.classList.add('hidden');
+                    }
+                });
+            }
+
+            tachesPageElement.dataset.listenersAttached = 'true';
+        }
+    }
     if (pageId === 'dossiersPage') filterAndRender();
     if (pageId === 'productivityPage') renderProductivityPage();
     if (pageId === 'calendarPage') {
@@ -1549,6 +1606,12 @@ function showPage(pageId) {
     if (pageId === 'statsPage') renderStatsPage('weekly');
     if (pageId === 'statsPage') renderStatsPage('weekly');
     if (pageId === 'facturationPage') renderFacturationPage(); // Add this line
+// If we are not navigating from a back/forward click, create a new history entry
+    if (!fromPopState) {
+        // Create a cleaner URL, e.g., turning 'dossiersPage' into '#dossiers'
+        const newUrl = `#${pageId.replace('Page', '')}`;
+        history.pushState({ page: pageId }, '', newUrl);
+    }
 
 
     updateNavStyles(pageId);
@@ -1872,17 +1935,33 @@ async function initializeAppState() {
         console.error("Initial data fetch failed:", error);
         showError("Le chargement des données a échoué. Veuillez réessayer.");
     } finally {
+        // Ensure data is filtered first
         filterDataForView();
-        populateFilters();
+
+        // Now that data is ready, populate all filters
+        populateAllFilters();
+        populateMonthFilter(); // This now runs in the correct sequence
+        populateAdvancedTaskFilters(); // Add this line
+
+        // Then, update the dashboard with the fresh data
         updateDashboard();
 
-        showPage('dashboardPage');
+        // Handle initial page load from URL hash or default to dashboard
+        const urlHash = window.location.hash.substring(1);
+        const initialPageId = urlHash ? `${urlHash}Page` : 'dashboardPage';
+
+        // Set the initial history state without creating a new entry
+        history.replaceState({ page: initialPageId }, '', `#${initialPageId.replace('Page', '')}`);
+
+        // Show the correct initial page
+        showPage(initialPageId, true);
+        
         if (currentUser.role.toLowerCase() === 'admin') {
             renderAdminPage();
         }
 
         notificationInterval = setInterval(fetchNotifications, 60000);
-        setInterval(updateAllTimers, 1000); // Start the global timer
+        setInterval(updateAllTimers, 1000);
         loadingSpinner.classList.add('hidden');
     }
 }
@@ -1950,8 +2029,9 @@ function updateDashboard() {
     });
     const statOverdueEl = document.getElementById('statOverdue');
     if (statOverdueEl) statOverdueEl.textContent = overdueTasks.length;
-    renderOverdueTasksList(overdueTasks);
-
+    window.overdueTasks = overdueTasks; // Store the list globally for filtering
+    populateOverdueMonthFilter(); // Populate the new dropdown
+    renderOverdueTasksList(); // Render the list for the first time
     const highDevisTasks = tasksData.filter(t => t.montantDevis > 20000);
     const statHighDevisEl = document.getElementById('statHighDevis');
     if (statHighDevisEl) statHighDevisEl.textContent = highDevisTasks.length;
@@ -2068,14 +2148,97 @@ function renderAgentKPIs() {
     });
 }
 
-function renderOverdueTasksList(overdueTasks) {
+function populateOverdueMonthFilter() {
+    const filter = document.getElementById('overdueMonthFilter');
+    if (!filter) return;
+
+    const months = new Set();
+    // Use the globally stored overdueTasks list
+    window.overdueTasks.forEach(task => {
+        // NEW LOGIC: Use the relevant date for the filter
+        // If dateLimite exists, use it. Otherwise, use dateReception for 48h-overdue tasks.
+        const relevantDateSource = task.dateLimite || task.dateReception;
+        if (relevantDateSource) {
+            const date = new Date(relevantDateSource);
+            if (!isNaN(date)) { // Ensure the date is valid before processing
+                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                months.add(monthYear);
+            }
+        }
+    });
+
+    filter.innerHTML = '<option value="all">Tous les mois</option>';
+    Array.from(months).sort().reverse().forEach(monthYear => {
+        const [year, month] = monthYear.split('-');
+        const date = new Date(year, month - 1, 1);
+        const optionText = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        filter.appendChild(new Option(optionText, monthYear));
+    });
+
+    // Add event listener only once to prevent duplicates
+    if (!filter.dataset.listenerAttached) {
+        filter.addEventListener('change', renderOverdueTasksList);
+        filter.dataset.listenerAttached = 'true';
+    }
+}
+
+function renderOverdueTasksList() {
     const listContainer = document.getElementById('overdueTasksList');
-    listContainer.innerHTML = overdueTasks.length === 0 ? `<p class="text-sm text-gray-500 text-center py-4">Aucun dossier en retard.</p>` : '';
-    overdueTasks.slice(0, 10).forEach(task => {
+    const filter = document.getElementById('overdueMonthFilter');
+    const selectedMonth = filter ? filter.value : 'all';
+
+    let tasksToRender = window.overdueTasks;
+
+    // Filter tasks based on the selected month
+    if (selectedMonth !== 'all') {
+        tasksToRender = window.overdueTasks.filter(task => {
+            // NEW, CORRECTED LOGIC:
+            // Use the same relevant date that was used to create the filter options.
+            const relevantDateSource = task.dateLimite || task.dateReception;
+            if (!relevantDateSource) return false; // Exclude if no date is available
+
+            const date = new Date(relevantDateSource);
+            if (isNaN(date)) return false; // Exclude if the date is invalid
+
+            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            return monthYear === selectedMonth;
+        });
+    }
+
+    listContainer.innerHTML = tasksToRender.length === 0 ? `<p class="text-sm text-gray-500 text-center py-4">Aucun dossier en retard pour cette période.</p>` : '';
+    
+    // New, safer sorting logic
+    tasksToRender.sort((a, b) => {
+        const dateA = a.dateLimite ? new Date(a.dateLimite) : new Date(a.dateReception);
+        const dateB = b.dateLimite ? new Date(b.dateLimite) : new Date(b.dateReception);
+        return dateA - dateB; // Sorts oldest first
+    });
+    
+    tasksToRender.forEach(task => {
+        let overdueText = '';
+        
+        if (task.dateLimite && new Date(task.dateLimite) < new Date()) {
+            const daysOverdue = Math.floor((new Date() - new Date(task.dateLimite)) / (1000 * 60 * 60 * 24));
+            overdueText = `${daysOverdue} jours (Final)`;
+        } else if (task.is48hOverdue) {
+            const daysSinceReception = Math.floor((new Date() - new Date(task.dateReception)) / (1000 * 60 * 60 * 24));
+            overdueText = `+${daysSinceReception} jours (Docs)`;
+        } else {
+            overdueText = 'Retard'; // Fallback
+        }
+
         const item = document.createElement('div');
-        item.className = 'overdue-item p-2 border-l-4 border-red-500 bg-red-50 rounded-r-lg cursor-pointer hover:bg-red-100 transition';
+        item.className = 'overdue-item p-3 border-l-4 border-red-500 bg-red-50 rounded-r-lg cursor-pointer hover:bg-red-100 transition';
         item.dataset.taskId = task.id;
-        item.innerHTML = `<p class="font-semibold text-sm text-gray-800">${task.ref} - ${task.assure}</p><p class="text-xs text-gray-600">Agent: ${task.agent} | Limite: ${new Date(task.dateLimite).toLocaleDateString('fr-FR')}</p>`;
+        item.innerHTML = `
+            <div class="flex justify-between items-center">
+                <p class="font-semibold text-sm text-gray-800">${task.ref} - ${task.assure}</p>
+                <span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                    ${overdueText}
+                </span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1">Agent: ${task.agent}</p>
+        `;
         listContainer.appendChild(item);
     });
 }
@@ -2726,41 +2889,108 @@ function getChecklistProgress(checklist = {}) {
     };
 }
 
-function populateFilters() {
+function populateAdvancedTaskFilters() {
+    const assigneeFilter = document.getElementById('advancedTaskAssigneeFilter');
+    if (!assigneeFilter) return;
+    
+    const allAssignees = [...new Set(agents.map(agent => agent.name).filter(Boolean))].sort();
+    
+    assigneeFilter.innerHTML = '<option value="all">Tous les agents</option>';
+    allAssignees.forEach(assignee => {
+        const option = new Option(assignee, assignee);
+        assigneeFilter.appendChild(option);
+    });
+}
+
+function populateMonthFilter() {
+    const monthFilter = document.getElementById('monthFilter');
+    const months = new Set();
+    allTasksData.forEach(task => {
+        if (task.dateReception) {
+            const date = new Date(task.dateReception);
+            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            months.add(monthYear);
+        }
+    });
+
+    monthFilter.innerHTML = '<option value="all">Tous les mois</option>';
+    Array.from(months).sort().reverse().forEach(monthYear => {
+        const [year, month] = monthYear.split('-');
+        const date = new Date(year, month - 1, 1);
+        const optionText = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        monthFilter.appendChild(new Option(optionText, monthYear));
+    });
+}
+
+function populateTachesFilters() {
+    const agentFilter = document.getElementById('tachesAgentFilter');
+    if (!agentFilter) return;
+
     agentFilter.innerHTML = '<option value="all">Tous les agents</option>';
-    [...new Set(allTasksData.map(task => task.agent).filter(Boolean))].sort().forEach(agent => {
-        agentFilter.appendChild(new Option(agent, agent));
+    const allAssignees = [...new Set(agents.map(agent => agent.name).filter(Boolean))].sort();
+    allAssignees.forEach(assignee => {
+        agentFilter.appendChild(new Option(assignee, assignee));
     });
-    companyFilter.innerHTML = '<option value="all">Toutes les compagnies</option>';
-    [...new Set(allTasksData.map(task => task.compagnie).filter(Boolean))].sort().forEach(company => {
-        companyFilter.appendChild(new Option(company, company));
-    });
+}
+
+function populateAllFilters() {
+    // Populate all agent dropdowns using the shared class
+    const agentDropdowns = document.querySelectorAll('.agent-dropdown');
+    if (agentDropdowns.length > 0) {
+        const allAssignees = [...new Set(agents.map(agent => agent.name).filter(Boolean))].sort();
+        agentDropdowns.forEach(filter => {
+            filter.innerHTML = '<option value="all">Tous les agents</option>';
+            allAssignees.forEach(assignee => {
+                filter.appendChild(new Option(assignee, assignee));
+            });
+        });
+    }
+
+    // Populate the company filter
+    const companyFilter = document.getElementById('companyFilter');
+    if (companyFilter) {
+        companyFilter.innerHTML = '<option value="all">Toutes les compagnies</option>';
+        [...new Set(allTasksData.map(task => task.compagnie).filter(Boolean))].sort().forEach(company => {
+            companyFilter.appendChild(new Option(company, company));
+        });
+    }
 }
 
 function filterAndRender(options = {}) {
     let filteredTasks = [...tasksData];
-    const agent = agentFilter.value,
-        company = companyFilter.value,
-        status = statusFilter.value;
+    const agent = agentFilter.value;
+    const company = companyFilter.value;
+    const status = statusFilter.value;
+    const month = document.getElementById('monthFilter').value; // Get month value
     const searchTerm = normalizeString(searchInput.value);
 
     if ((currentUser.role === 'admin' || currentUser.role.toLowerCase() === 'assigner') && agent !== 'all') {
         filteredTasks = filteredTasks.filter(task => task.agent === agent);
     }
-    if (company !== 'all') filteredTasks = filteredTasks.filter(task => task.compagnie === company);
+    if (company !== 'all') {
+        filteredTasks = filteredTasks.filter(task => task.compagnie === company);
+    }
+    if (month !== 'all') { // Add month filter logic
+        filteredTasks = filteredTasks.filter(task => {
+            if (!task.dateReception) return false;
+            const date = new Date(task.dateReception);
+            const taskMonthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            return taskMonthYear === month;
+        });
+    }
     if (status !== 'all') {
-        if (status === 'inachevee') {
-            filteredTasks = filteredTasks.filter(task => {
-                const s = normalizeString(getCleanedStatus(task.statut));
-                return s.includes('inachevee') || s.includes('en cours');
-            });
+        if (status === 'inachevee') {
+            filteredTasks = filteredTasks.filter(task => {
+                const s = normalizeString(getCleanedStatus(task.statut));
+                return s.includes('inachevee') || s.includes('en cours');
+            });
         } else if (status === '48hOverdue') {
             filteredTasks = filteredTasks.filter(task => task.is48hOverdue);
-        } else {
-            const s = normalizeString(status);
-            filteredTasks = filteredTasks.filter(task => task.statut && normalizeString(getCleanedStatus(task.statut)).includes(s));
-        }
-    }
+        } else {
+            const s = normalizeString(status);
+            filteredTasks = filteredTasks.filter(task => task.statut && normalizeString(getCleanedStatus(task.statut)).includes(s));
+        }
+    }
     
     if (searchTerm) {
         filteredTasks = filteredTasks.filter(task =>
@@ -2778,11 +3008,6 @@ function filterAndRender(options = {}) {
         filteredTasks = filteredTasks.filter(t => {
             const isCompleted = normalizeString(getCleanedStatus(t.statut)).includes('termine');
             if (isCompleted || !t.dateLimite) return false;
-
-            if (t.devisStatus === "Client n'a pas envoyé") {
-                return false;
-            }
-
             return new Date(t.dateLimite) < today;
         });
     }
@@ -2876,8 +3101,7 @@ function openModalForNewTask() {
 
     checkAgentAvailability(''); // Reset warning when opening modal
 
-    const step1Items = ["Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", "Photos roues et au dessous", "Compteur Km", "VIN", "Devis"];
-    const step2Items = ["Photos en cours et après réparation"];
+    const step1Items = ["Attestation d'assurance", "Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", "Photos roues et au dessous", "Compteur Km", "VIN", "Devis"];    const step2Items = ["Photos en cours et après réparation"];
 
     const checklistContainer = document.getElementById('modalChecklist');
     checklistContainer.innerHTML = '';
@@ -3056,7 +3280,7 @@ async function openModal(taskId) {
     }
 
     const checklist = task.checklist || {};
-    const step1Items = ["Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", "Photos roues et au dessous", "Compteur Km", "VIN", "Devis"];
+    const step1Items = ["Attestation d'assurance", "Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", "Photos roues et au dessous", "Compteur Km", "VIN", "Devis"];
     const step2Items = ["Photos en cours et après réparation"];
 
     const checklistContainer = document.getElementById('modalChecklist');
@@ -3479,7 +3703,9 @@ const CLIENT_HEADER_MAP = {
             closeImportModal();
             await fetchTasks();
             filterDataForView();
-            populateFilters();
+            populateAllFilters(); // This now handles both agent filters + company filter
+            populateMonthFilter();
+            populateTachesFilters(); // Add this line
             filterAndRender();
 
         } catch (error) {
@@ -3635,8 +3861,8 @@ function renderActivityLog(logs) {
 
 function renderFiles(files) {
     const fileCategories = [
-        "Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs", 
-        "Photos roues et au dessous", "Compteur Km", "VIN", "Devis", 
+        "Attestation d'assurance", "Carte Grise", "Constat", "Dégâts extérieurs", "Dégâts intérieurs",
+        "Photos roues et au dessous", "Compteur Km", "VIN", "Devis",
         "Photos en cours et après réparation"
     ];
     const fileCategoryList = document.getElementById('fileCategoryList');
@@ -4069,36 +4295,38 @@ function renderAdvancedTasks() {
     const doneCol = document.getElementById('done-col');
     [todoCol, inprogressCol, doneCol].forEach(col => col.innerHTML = '');
 
-    // Populate assignee filter
-    const allAssignees = [...new Set(agents.map(agent => agent.name).filter(Boolean))].sort();
-    advancedTaskAssigneeFilter.innerHTML = '<option value="all">Tous les agents</option>';
-    allAssignees.forEach(assignee => {
-        const option = new Option(assignee, assignee);
-        advancedTaskAssigneeFilter.appendChild(option);
+    // Get filter and sort values
+    const agent = document.getElementById('tachesAgentFilter').value;
+    const startDate = document.getElementById('tachesStartDateFilter').value;
+    const endDate = document.getElementById('tachesEndDateFilter').value;
+    const sortOrder = document.getElementById('tachesSortControl').value;
+
+    let tasksToProcess = [...advancedTasks];
+
+    // 1. Apply Filters
+    if (agent !== 'all') {
+        tasksToProcess = tasksToProcess.filter(task => task.Assignee === agent);
+    }
+    if (startDate) {
+        tasksToProcess = tasksToProcess.filter(task => task.Deadline && task.Deadline.split('T')[0] >= startDate);
+    }
+    if (endDate) {
+        tasksToProcess = tasksToProcess.filter(task => task.Deadline && task.Deadline.split('T')[0] <= endDate);
+    }
+
+    // 2. Apply Sorting
+    tasksToProcess.sort((a, b) => {
+        const dateA = a.Deadline ? new Date(a.Deadline) : 0;
+        const dateB = b.Deadline ? new Date(b.Deadline) : 0;
+        if (!dateA) return 1; // Put tasks without deadlines at the end
+        if (!dateB) return -1;
+        
+        return sortOrder === 'deadline-asc' ? dateA - dateB : dateB - dateA;
     });
 
-    // Get filter values
-    const searchTerm = advancedTaskSearch.value.toLowerCase();
-    const selectedAssignee = advancedTaskAssigneeFilter.value;
-    const selectedPriority = advancedTaskPriorityFilter.value;
-    const showUrgentOnly = urgentFilter.checked;
-    const sevenDaysFromNow = new Date();
-    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-
-    // Filter tasks
-    const filteredTasks = advancedTasks.filter(task => {
-        const matchesSearch = task.Title.toLowerCase().includes(searchTerm);
-        const matchesAssignee = selectedAssignee === 'all' || task.Assignee === selectedAssignee;
-        const matchesPriority = selectedPriority === 'all' || task.Priority === selectedPriority;
-        const deadline = task.Deadline ? new Date(task.Deadline) : null;
-        const matchesUrgent = !showUrgentOnly || (deadline && deadline <= sevenDaysFromNow);
-        return matchesSearch && matchesAssignee && matchesPriority && matchesUrgent;
-    });
-
+    // 3. Render tasks into columns
     let todo = 0, inprogress = 0, done = 0;
-
-    // Render tasks into columns
-    filteredTasks.forEach(task => {
+    tasksToProcess.forEach(task => {
         const taskEl = createAdvancedTaskElement(task);
         if (task.Status === 'En Cours') {
             inprogressCol.appendChild(taskEl);
@@ -4112,29 +4340,64 @@ function renderAdvancedTasks() {
         }
     });
 
-// Update counts for both desktop headers and mobile tabs
-    todoCount.textContent = todo;
-    inprogressCount.textContent = inprogress;
-    doneCount.textContent = done;
-    
+    // Update counts
+    document.getElementById('todo-count').textContent = todo;
+    document.getElementById('inprogress-count').textContent = inprogress;
+    document.getElementById('done-count').textContent = done;
     document.getElementById('mobile-todo-count').textContent = todo;
     document.getElementById('mobile-inprogress-count').textContent = inprogress;
     document.getElementById('mobile-done-count').textContent = done;
-
-    // Re-apply the mobile tab logic to ensure the correct column is visible
     setupMobileKanbanTabs();
 }
 
 function createAdvancedTaskElement(task) {
     const div = document.createElement('div');
-    div.className = 'kanban-task bg-white p-4 rounded-lg shadow-sm border border-gray-200 cursor-grab';
     div.draggable = true;
     div.dataset.id = task.ID;
 
+    // --- NEW LOGIC for Overdue Styling ---
+    let cardBgClass = 'bg-white';
+    let footerAlert = '';
+    const deadline = task.Deadline ? new Date(task.Deadline) : null;
+    const isOverdueByDeadline = deadline && new Date() > deadline && task.Status !== 'Terminé';
+    const timeBudgetMillis = MISSION_DURATION_MIN * 60 * 1000;
+    const timeSpent = (task.TimeSpentMillis || 0);
+    const isOverdueByTimer = timeSpent > timeBudgetMillis;
+
+    if (isOverdueByDeadline) {
+        cardBgClass = 'bg-red-50 border-red-200';
+        const daysOverdue = Math.floor((new Date() - deadline) / (1000 * 60 * 60 * 24));
+        footerAlert = `
+            <div class="text-xs font-semibold text-red-700 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 3.001-1.742 3.001H4.42c-1.53 0-2.493-1.667-1.743-3.001l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                <span>En retard de ${daysOverdue} jour(s)</span>
+            </div>
+        `;
+    } else if (isOverdueByTimer) {
+        cardBgClass = 'bg-yellow-50 border-yellow-300';
+        if (task.Status === 'Terminé') {
+            const minutesSpent = Math.round(timeSpent / 60000);
+            footerAlert = `
+                <div class="text-xs font-semibold text-yellow-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+                    <span>Fait en ${minutesSpent} min</span>
+                </div>
+            `;
+        } else { // Still 'En Cours'
+             footerAlert = `
+                <div class="text-xs font-semibold text-red-700 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
+                    <span>Délai Dépassé</span>
+                </div>
+            `;
+        }
+    }
+    // --- END of new logic ---
+    
+    div.className = `kanban-task p-4 rounded-lg shadow-sm border ${cardBgClass} cursor-grab`;
+    const isTimerActive = task.Status === 'En Cours' && task.InProgressTimestamp;
     const priorityClasses = { 'Haute': 'bg-red-500', 'Moyenne': 'bg-yellow-500', 'Basse': 'bg-green-500' };
     const priorityColor = priorityClasses[task.Priority] || 'bg-gray-400';
-    const deadline = task.Deadline ? new Date(task.Deadline) : null;
-    const isOverdue = deadline && new Date() > deadline && task.Status !== 'Terminé';
     const subtasks = task.Subtasks || [];
     const completedSubtasks = subtasks.filter(st => st.completed).length;
     const subtaskProgress = subtasks.length > 0 ? (completedSubtasks / subtasks.length) * 100 : 0;
@@ -4143,11 +4406,15 @@ function createAdvancedTaskElement(task) {
 
     div.innerHTML = `
         <div class="flex justify-between items-start mb-2">
-            <h3 class="font-bold text-base text-gray-800 flex items-center gap-2">${task.Title}</h3>
+            <h3 class="font-bold text-base text-gray-800">${task.Title}</h3>
             <img src="${agentImg}" alt="${task.Assignee}" class="w-8 h-8 rounded-full object-cover border-2 border-white ring-1 ring-gray-200" title="${task.Assignee || 'Non assigné'}">
         </div>
         <p class="text-sm text-gray-600 mb-3">${task.Description || ''}</p>
         
+        ${isTimerActive ? `
+        <div class="countdown-timer flex items-center justify-center gap-1.5 text-sm font-bold p-1.5 rounded-md mb-3" data-task-id="${task.ID}">
+        </div>` : ''}
+
         ${subtasks.length > 0 ? `
         <div class="mb-3">
             <div class="flex justify-between items-center mb-1">
@@ -4157,12 +4424,9 @@ function createAdvancedTaskElement(task) {
             <div class="w-full bg-gray-200 rounded-full h-1.5"><div class="bg-blue-600 h-1.5 rounded-full" style="width: ${subtaskProgress}%"></div></div>
         </div>` : ''}
 
-        <div class="text-xs text-gray-500 border-t pt-3 mt-3 flex justify-between items-center">
-            <span class="flex items-center gap-1 ${isOverdue ? 'text-red-600 font-bold' : ''}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                ${deadline ? deadline.toLocaleDateString('fr-FR') : 'Pas de date'}
-            </span>
-            <span class="w-16 h-1.5 rounded-full ${priorityColor}" title="Priorité: ${task.Priority}"></span>
+        <div class="border-t pt-3 mt-3 flex justify-between items-center">
+            <div class="flex-grow">${footerAlert}</div>
+            <span class="w-16 h-1.5 rounded-full ${priorityColor} ml-4" title="Priorité: ${task.Priority}"></span>
         </div>
 
         <div class="lg:hidden mt-3 pt-3 border-t border-gray-100">
@@ -4174,7 +4438,13 @@ function createAdvancedTaskElement(task) {
         </div>
     `;
 
-    div.addEventListener('click', () => openAdvancedTaskModal(task));
+    div.addEventListener('click', (e) => {
+        if (e.target.classList.contains('mobile-status-select')) {
+            e.stopPropagation();
+            return;
+        }
+        openAdvancedTaskModal(task);
+    });
     div.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', task.ID); e.target.classList.add('dragging'); });
     div.addEventListener('dragend', (e) => { e.target.classList.remove('dragging'); });
     return div;
@@ -4186,15 +4456,17 @@ function setupDragAndDrop() {
         col.addEventListener('dragover', e => {
             e.preventDefault();
         });
-        col.addEventListener('drop', e => {
+        col.addEventListener('drop', async (e) => {
             e.preventDefault();
             const taskId = e.dataTransfer.getData('text/plain');
             const newStatus = col.id === 'todo-col' ? 'À Faire' : (col.id === 'inprogress-col' ? 'En Cours' : 'Terminé');
-
+            
             const draggedElement = document.querySelector(`.kanban-task[data-id='${taskId}']`);
             if (draggedElement) {
-                col.appendChild(draggedElement);
-                updateAdvancedTaskStatus(taskId, newStatus);
+                loadingSpinner.classList.remove('hidden');
+                await updateAdvancedTaskStatus(taskId, newStatus);
+                await fetchAdvancedTasks(); // This re-fetches and re-renders all tasks
+                loadingSpinner.classList.add('hidden');
             }
         });
     });
@@ -4386,8 +4658,16 @@ function renderCalendar(year, month) {
         const dayEvents = [];
 
         // Filter and collect all items for the current day
-        allTasksData.filter(task => (selectedAgent === 'all' || task.agent === selectedAgent) && task.dateLimite && new Date(task.dateLimite).toDateString() === currentDate.toDateString())
-            .forEach(task => dayEvents.push({ type: 'dossier', item: task }));
+        allTasksData.filter(task => {
+            const isCompleted = normalizeString(getCleanedStatus(task.statut)).includes('termine');
+            const matchesAgent = selectedAgent === 'all' || task.agent === selectedAgent;
+            const matchesDate = task.dateLimite && new Date(task.dateLimite).toDateString() === currentDate.toDateString();
+            
+            // Only return true if the dossier is NOT completed and matches the other filters
+            return !isCompleted && matchesAgent && matchesDate;
+        })       
+        
+        .forEach(task => dayEvents.push({ type: 'dossier', item: task }));
         
         advancedTasks.filter(task => (selectedAgent === 'all' || task.Assignee === selectedAgent) && task.Deadline && new Date(task.Deadline).toDateString() === currentDate.toDateString())
             .forEach(task => dayEvents.push({ type: 'task', item: task }));
@@ -4686,6 +4966,7 @@ addTaskBtn.addEventListener('click', openModalForNewTask);
 agentFilter.addEventListener('change', filterAndRender);
 companyFilter.addEventListener('change', filterAndRender);
 statusFilter.addEventListener('change', filterAndRender);
+document.getElementById('monthFilter').addEventListener('change', filterAndRender); // Add this line
 searchInput.addEventListener('input', filterAndRender);
 closeModalBtn.addEventListener('click', closeModal);
 saveChangesBtn.addEventListener('click', saveChanges);
@@ -4709,8 +4990,6 @@ notificationBtn.addEventListener('click', () => {
 document.getElementById('statCardTotal').addEventListener('click', () => navigateToTasksWithStatus('all'));
 document.getElementById('statCardCompleted').addEventListener('click', () => navigateToTasksWithStatus('Terminé'));
 document.getElementById('statCardInProgress').addEventListener('click', () => navigateToTasksWithStatus('inachevee'));
-document.getElementById('statCardTodo').addEventListener('click', () => navigateToTasksWithStatus('À faire'));
-document.getElementById('statCardOverdue').addEventListener('click', () => navigateToTasksWithOverdueFilter());
 statCardHighDevis.addEventListener('click', navigateToTasksWithHighDevis);
 
 tabDetails.addEventListener('click', () => switchModalTab('details'));
@@ -4898,12 +5177,6 @@ cancelFileActionBtn.addEventListener('click', closeFileActionSheet);
 
 // Listen for a file from the camera input and use the same upload function
 cameraUploadInput.addEventListener('change', handleFileUpload);
-
-// --- EVENT LISTENERS FOR TÂCHES PAGE FILTERS ---
-advancedTaskSearch.addEventListener('input', renderAdvancedTasks);
-advancedTaskAssigneeFilter.addEventListener('change', renderAdvancedTasks);
-advancedTaskPriorityFilter.addEventListener('change', renderAdvancedTasks);
-urgentFilter.addEventListener('change', renderAdvancedTasks);
 
 
 // --- THIS IS THE MISSING FUNCTION ---
@@ -5108,6 +5381,16 @@ function initializeApp() {
         return;
     }
     setupDragAndDrop();
+    // NEW: Listen for back/forward button clicks
+    window.addEventListener('popstate', (event) => {
+        if (event.state && event.state.page) {
+            // Show the page from the history state, without creating a new history entry
+            showPage(event.state.page, true);
+        } else {
+            // This handles going back to the very first page load
+            showPage('dashboardPage', true);
+        }
+    });
     setupMobileKanbanTabs();
 
 
