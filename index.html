@@ -695,33 +695,35 @@
                 Ajouter une Tâche
             </button>
         </div>
-        <div id="tachesFilterBar" class="mt-6 p-3 bg-white rounded-xl border border-gray-200 grid grid-cols-2 md:grid-cols-5 gap-3 items-center">
-            <div class="col-span-2 md:col-span-1">
-                <label for="tachesAgentFilter" class="block text-xs font-medium text-gray-500">Agent</label>
-                    <select id="tachesAgentFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm agent-dropdown"></select>
-                </select>
-            </div>
-            <div>
-                <label for="tachesStartDateFilter" class="block text-xs font-medium text-gray-500">Depuis le</label>
-                <input type="date" id="tachesStartDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
-            </div>
-            <div>
-                <label for="tachesEndDateFilter" class="block text-xs font-medium text-gray-500">Jusqu'au</label>
-                <input type="date" id="tachesEndDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
-            </div>
-            <div>
-                <label for="tachesSortControl" class="block text-xs font-medium text-gray-500">Trier par</label>
-                <select id="tachesSortControl" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
-                    <option value="deadline-asc">Plus Ancien au Plus Récent</option>
-                    <option value="deadline-desc">Plus Récent au Plus Ancien</option>
-                </select>
-            </div>
-            <div class="col-span-2 md:col-span-1">
-                 <label class="block text-xs font-medium text-transparent">.</label>
-                <button id="resetTachesFilters" class="mt-1 w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Réinitialiser</button>
-            </div>
-        </div>
     </header>
+
+    <div id="tachesFilterBar" class="sticky top-16 z-10 p-3 bg-white rounded-xl border border-gray-200 grid grid-cols-2 md:grid-cols-5 gap-3 items-center mb-6 shadow-sm">
+        <div class="col-span-2 md:col-span-1">
+            <label for="tachesAgentFilter" class="block text-xs font-medium text-gray-500">Agent</label>
+            <select id="tachesAgentFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm agent-dropdown">
+                <option value="all">Tous les agents</option>
+            </select>
+        </div>
+        <div>
+            <label for="tachesStartDateFilter" class="block text-xs font-medium text-gray-500">Depuis le</label>
+            <input type="date" id="tachesStartDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+        </div>
+        <div>
+            <label for="tachesEndDateFilter" class="block text-xs font-medium text-gray-500">Jusqu'au</label>
+            <input type="date" id="tachesEndDateFilter" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+        </div>
+        <div>
+            <label for="tachesSortControl" class="block text-xs font-medium text-gray-500">Trier par</label>
+            <select id="tachesSortControl" class="mt-1 w-full border-gray-300 rounded-lg shadow-sm text-sm">
+                <option value="deadline-asc">Plus Ancien au Plus Récent</option>
+                <option value="deadline-desc">Plus Récent au Plus Ancien</option>
+            </select>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+             <label class="block text-xs font-medium text-transparent">.</label>
+            <button id="resetTachesFilters" class="mt-1 w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm">Réinitialiser</button>
+        </div>
+    </div>
 
                     <div id="kanban-tabs-mobile" class="lg:hidden mb-4 border-b border-gray-200">
                         <nav class="-mb-px flex space-x-6" aria-label="Tabs">
